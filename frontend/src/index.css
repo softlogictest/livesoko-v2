@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Backgrounds */
+  --bg-base:        #0A0A0A;
+  --bg-surface:     #111111;
+  --bg-elevated:    #1A1A1A;
+  --bg-input:       #1F1F1F;
+
+  /* Brand */
+  --brand-primary:  #00FF88;
+  --brand-dim:      #00CC6A;
+
+  /* Status */
+  --status-verified: #00FF88;
+  --status-fraud:    #FF2D2D;
+  --status-review:   #FFB800;
+  --status-pending:  #4A4A4A;
+
+  /* Text */
+  --text-primary:   #F5F5F5;
+  --text-secondary: #888888;
+  --text-muted:     #444444;
+
+  /* Borders */
+  --border-subtle:  #222222;
+  --border-active:  #333333;
+
+  /* Semantic */
+  --destructive:    #FF2D2D;
+  --success:        #00FF88;
+  --warning:        #FFB800;
+
+  /* Typography */
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body:    'DM Mono', monospace;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6, .display-font {
+  font-family: var(--font-display);
+}

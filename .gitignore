@@ -1,0 +1,10 @@
+node_modules/
+*.db
+*.db-shm
+*.db-wal
+.env
+.env.local
+backend/public/
+frontend/dist/
+backend/clear_sheet_url.js
+backend/repair_db.js
