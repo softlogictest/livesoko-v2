@@ -62,10 +62,10 @@ db.prepare(`
   VALUES (?, ?, ?, ?, ?)
 `).run(
   'handyman-id-001',
-  'handyman@dukalive.local',
+  'handyman@vibesoko.local',
   handymanPass,
   'handyman',
-  'DukaLive Sample Shop'
+  'VibeSoko Sample Shop'
 );
 
 // Serve React frontend
