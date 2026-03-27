@@ -1,4 +1,4 @@
-# DukaLive — Privacy Policy (Draft)
+# VibeSoko — Privacy Policy (Draft)
 
 *Last Updated: March 27, 2026*
 

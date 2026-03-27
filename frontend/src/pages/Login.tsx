@@ -11,6 +11,8 @@ export const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [mustChangePassword, setMustChangePassword] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [shopName, setShopName] = useState('');
   const [authToken, setAuthToken] = useState('');
   const { dispatch, notify } = useAppContext();
   const navigate = useNavigate();
@@ -49,6 +51,35 @@ export const Login: React.FC = () => {
       navigate('/dashboard/live');
     } catch (err: any) {
       notify('Cannot reach server. Is the backend running?', 'error');
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!shopName) return notify('Shop name is required', 'error');
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, shop_name: shopName })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        notify(data.error || 'Registration failed', 'error');
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem('dukalive_token', data.token);
+      dispatch({ type: 'SET_USER', payload: { ...data.user, token: data.token } as any });
+      notify('Welcome to VibeSoko!', 'success');
+      navigate('/dashboard/live');
+    } catch (err: any) {
+      notify('Cannot reach server', 'error');
       setLoading(false);
     }
   };
@@ -147,12 +178,21 @@ export const Login: React.FC = () => {
     <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center p-6 pb-32">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10 text-brand-primary">
-          <h1 className="font-display font-bold text-5xl tracking-wider mb-2">DukaLive</h1>
-          <p className="font-body text-text-secondary text-sm uppercase tracking-widest">v2.1.0-cloud • 2026-03-27</p>
+          <h1 className="font-display font-bold text-5xl tracking-wider mb-2">VibeSoko</h1>
+          <p className="font-body text-text-secondary text-sm uppercase tracking-widest">v2.2.0 • 2026-03-27</p>
         </div>
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          {error && <div className="bg-status-fraud/10 text-status-fraud p-3 rounded font-body text-sm border border-status-fraud text-center">{error}</div>}
+        <form onSubmit={isRegistering ? handleRegister : handleLogin} className="flex flex-col gap-4">
+          {isRegistering && (
+            <input
+              type="text"
+              value={shopName}
+              onChange={e => setShopName(e.target.value)}
+              placeholder="Shop Name (e.g. My Style Hub)"
+              className="bg-bg-input border border-border-subtle rounded p-4 text-text-primary font-body focus:outline-none focus:border-brand-primary transition-colors"
+              required
+            />
+          )}
 
           <input
             type="email"
@@ -177,9 +217,19 @@ export const Login: React.FC = () => {
             disabled={loading}
             className="mt-4 bg-brand-primary text-black font-display font-bold text-xl py-4 rounded transition-transform active:scale-[0.98] disabled:opacity-50 tracking-wide"
           >
-            {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
+            {loading ? 'PROCESSING...' : (isRegistering ? 'CREATE SHOP' : 'SIGN IN')}
           </button>
         </form>
+
+        <p className="text-center mt-8 text-text-secondary font-body text-sm">
+          {isRegistering ? 'Already have a shop?' : 'Want to sell on VibeSoko?'}
+          <button 
+            onClick={() => setIsRegistering(!isRegistering)}
+            className="ml-2 text-brand-primary font-bold underline"
+          >
+            {isRegistering ? 'Sign In' : 'Create Account'}
+          </button>
+        </p>
       </div>
     </div>
   );

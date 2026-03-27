@@ -4,6 +4,44 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { getDb } = require('../lib/database');
 
+// POST /api/auth/register
+router.post('/register', (req, res) => {
+  const { email, password, shop_name } = req.body;
+  if (!email || !password || !shop_name) {
+    return res.status(400).json({ error: 'Email, password, and shop name are required' });
+  }
+
+  const db = getDb();
+  
+  // Check if email already exists
+  const existing = db.prepare('SELECT id FROM profiles WHERE email = ?').get(email.toLowerCase().trim());
+  if (existing) {
+    return res.status(400).json({ error: 'Email already in use' });
+  }
+
+  try {
+    const id = crypto.randomUUID();
+    const hash = bcrypt.hashSync(password, 10);
+    const webhookToken = 'tok_' + crypto.randomBytes(6).toString('hex');
+
+    db.prepare(`
+      INSERT INTO profiles (id, email, password_hash, must_change_password, role, shop_name, webhook_token)
+      VALUES (?, ?, ?, 0, 'seller', ?, ?)
+    `).run(id, email.toLowerCase().trim(), hash, shop_name, webhookToken);
+
+    // Auto-login after registration
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    db.prepare('INSERT INTO auth_tokens (token, user_id, expires_at) VALUES (?, ?, ?)').run(token, id, expires);
+
+    const user = db.prepare('SELECT id, email, role, shop_name FROM profiles WHERE id = ?').get(id);
+    res.json({ message: 'Account created', token, user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create account' });
+  }
+});
+
 // POST /api/auth/login
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
