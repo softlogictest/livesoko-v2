@@ -13,7 +13,10 @@ Explore our detailed guides in the `/docs` folder:
 - [**Security Architecture**](docs/SECURITY.md): How we protect your data with the 6 Hardening Pillars.
 - [**Architecture Flow**](docs/ARCHITECTURE_FLOW.md): How data moves from TikTok to your Dashboard.
 - [**Lessons Learned**](docs/LESSONS_LEARNED.md): Technical hurdles we fixed and "What Works".
-- [**AI Prompting Guide**](docs/PROMPTING_GUIDE.md): Best practices for future development with AI.
+- [**Trade-offs**](docs/TRADE_OFFS.md): Why we chose SQLite and SSE over alternatives.
+- [**Edge Cases**](docs/EDGE_CASES.md): How the system handles duplicates and network drops.
+- [**Public Repo Security**](docs/REPO_SECURITY.md): How to keep your source code safe on GitHub.
+- [**AI Prompting Guide**](docs/PROMPTING_GUIDE.md): Best practices for future development.
 
 ## 📱 PWA Features
 - **Installable**: Full "Add to Home Screen" support for a native mobile experience.
