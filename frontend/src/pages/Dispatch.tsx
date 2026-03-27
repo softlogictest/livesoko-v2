@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { OrderCardProps } from '../types';
-import { API } from '../App';
+import { fetchWithAuth } from '../lib/api';
 
 export const Dispatch: React.FC = () => {
   const { state } = useAppContext();
@@ -14,12 +13,8 @@ export const Dispatch: React.FC = () => {
       if (!state.user || !state.activeSession) { setLoading(false); return; }
       try {
         const [r1, r2] = await Promise.all([
-          fetch(`${API}/api/orders?session_id=${state.activeSession.id}&status=VERIFIED`, {
-            headers: { 'Authorization': `Bearer ${state.user.token}` }
-          }),
-          fetch(`${API}/api/orders?session_id=${state.activeSession.id}&status=COD_PENDING`, {
-            headers: { 'Authorization': `Bearer ${state.user.token}` }
-          }),
+          fetchWithAuth(`/api/orders?session_id=${state.activeSession.id}&status=VERIFIED`),
+          fetchWithAuth(`/api/orders?session_id=${state.activeSession.id}&status=COD_PENDING`),
         ]);
         const [v, c] = await Promise.all([r1.json(), r2.json()]);
         const combined = [...(Array.isArray(v) ? v : []), ...(Array.isArray(c) ? c : [])];

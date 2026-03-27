@@ -11,10 +11,7 @@ export const SessionSummary: React.FC<{ sessionId: string; onDone?: () => void }
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const token = state.user?.token || localStorage.getItem('dukalive_token');
-        const res = await fetch(`${API}/api/sessions/${sessionId}/summary`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await fetchWithAuth(`/api/sessions/${sessionId}/summary`);
         if (res.ok) {
           setData(await res.json());
         } else {
