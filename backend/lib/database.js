@@ -9,6 +9,13 @@ const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'dukalive.db')
 let db;
 
 function init() {
+  // Ensure the directory for the database exists (crucial for Railway volumes)
+  const fs = require('fs');
+  const dbDir = path.dirname(DB_PATH);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
   db = new Database(DB_PATH);
 
   // WAL mode for crash safety and better concurrent read performance
