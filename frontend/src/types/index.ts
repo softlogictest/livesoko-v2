@@ -37,4 +37,5 @@ export interface AppState {
   } | null;
   orders: OrderCardProps[];
   toast: { message: string; type: 'success' | 'error' | 'info' } | null;
+  installPrompt: any;
 }

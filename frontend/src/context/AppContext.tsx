@@ -8,13 +8,15 @@ type Action =
   | { type: 'ADD_ORDER'; payload: OrderCardProps }
   | { type: 'UPDATE_ORDER'; payload: OrderCardProps }
   | { type: 'DELETE_ORDER'; payload: { id: string } }
-  | { type: 'SET_TOAST'; payload: { message: string; type: 'success' | 'error' | 'info' } | null };
+  | { type: 'SET_TOAST'; payload: { message: string; type: 'success' | 'error' | 'info' } | null }
+  | { type: 'SET_INSTALL_PROMPT'; payload: any };
 
 const initialState: AppState = {
   user: null,
   activeSession: null,
   orders: [],
   toast: null,
+  installPrompt: null,
 };
 
 function appReducer(state: AppState, action: Action): AppState {
@@ -40,6 +42,8 @@ function appReducer(state: AppState, action: Action): AppState {
       };
     case 'SET_TOAST':
       return { ...state, toast: action.payload };
+    case 'SET_INSTALL_PROMPT':
+      return { ...state, installPrompt: action.payload };
     default:
       return state;
   }

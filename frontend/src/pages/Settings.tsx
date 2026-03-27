@@ -76,6 +76,15 @@ export const Settings: React.FC = () => {
     dispatch({ type: 'SET_USER', payload: null });
   };
 
+  const handleInstall = async () => {
+    if (!state.installPrompt) return;
+    state.installPrompt.prompt();
+    const { outcome } = await state.installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      dispatch({ type: 'SET_INSTALL_PROMPT', payload: null });
+    }
+  };
+
   if (loading) return <div className="p-8 text-center text-text-muted">Loading...</div>;
 
   // Determine the local IP from the current window location to show the user
@@ -156,6 +165,15 @@ export const Settings: React.FC = () => {
           </button>
         </form>
       </div>
+
+      {state.installPrompt && (
+        <button 
+          onClick={handleInstall}
+          className="w-full py-4 mb-3 bg-brand-primary text-black rounded font-bold tracking-widest font-display text-lg animate-pulse"
+        >
+          INSTALL DUKALIVE APP
+        </button>
+      )}
 
       <button onClick={handleLogout} className="w-full py-4 text-status-fraud border border-status-fraud rounded font-bold tracking-widest font-display text-lg">
         SIGN OUT
