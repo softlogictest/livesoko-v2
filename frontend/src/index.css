@@ -49,3 +49,13 @@ body {
 h1, h2, h3, h4, h5, h6, .display-font {
   font-family: var(--font-display);
 }
+
+@keyframes bounce-in {
+  0% { transform: translate(-50%, -20px) scale(0.9); opacity: 0; }
+  50% { transform: translate(-50%, 5px) scale(1.02); }
+  100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}

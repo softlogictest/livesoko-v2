@@ -2,10 +2,26 @@
   "name": "dukalive-pwa",
   "short_name": "DukaLive",
   "description": "Local-first live commerce for social sellers",
-  "start_url": "/",
-  "display": "standalone",
+  "theme_color": "#000000",
   "background_color": "#000000",
-  "theme_color": "#a3e635",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "shortcuts": [
+    {
+      "name": "Live Feed",
+      "short_name": "Live",
+      "url": "/live",
+      "description": "Start selling on TikTok Live"
+    },
+    {
+      "name": "Settings",
+      "short_name": "Settings",
+      "url": "/settings",
+      "description": "Manage your shop and staff"
+    }
+  ],
   "icons": [
     {
       "src": "/icon-192.png",

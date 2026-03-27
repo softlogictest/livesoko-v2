@@ -36,4 +36,5 @@ export interface AppState {
     verified_revenue: number;
   } | null;
   orders: OrderCardProps[];
+  toast: { message: string; type: 'success' | 'error' | 'info' } | null;
 }

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const { getDb } = require('../lib/database');
+const { body, validationResult } = require('express-validator');
 const { broadcast } = require('./events');
 
 router.use((req, res, next) => {
@@ -34,7 +35,16 @@ router.get('/', (req, res) => {
 });
 
 // POST /api/orders — create an order (from Google Form webhook or manual)
-router.post('/', (req, res) => {
+router.post('/', [
+  body('buyer_name').trim().notEmpty().withMessage('Buyer name is required'),
+  body('buyer_phone').trim().notEmpty().withMessage('Phone is required'),
+  body('item_name').trim().notEmpty().withMessage('Item name is required'),
+  body('quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+  body('unit_price').isFloat({ min: 0 }).withMessage('Price cannot be negative'),
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   const { webhook_token, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, payment_type, buyer_mpesa_name } = req.body;
 
   // Can be called with webhook_token (unauthenticated, for form/sheet intake)

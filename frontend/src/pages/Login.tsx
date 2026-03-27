@@ -12,7 +12,7 @@ export const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [mustChangePassword, setMustChangePassword] = useState(false);
   const [authToken, setAuthToken] = useState('');
-  const { dispatch } = useAppContext();
+  const { dispatch, notify } = useAppContext();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -30,7 +30,7 @@ export const Login: React.FC = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Login failed');
+        notify(data.error || 'Login failed', 'error');
         setLoading(false);
         return;
       }
@@ -48,7 +48,7 @@ export const Login: React.FC = () => {
       dispatch({ type: 'SET_USER', payload: { ...data.user, token: data.token } as any });
       navigate('/dashboard/live');
     } catch (err: any) {
-      setError('Cannot reach server. Is the backend running?');
+      notify('Cannot reach server. Is the backend running?', 'error');
       setLoading(false);
     }
   };
@@ -81,7 +81,7 @@ export const Login: React.FC = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Failed to change password');
+        notify(data.error || 'Failed to change password', 'error');
         setLoading(false);
         return;
       }
@@ -91,7 +91,7 @@ export const Login: React.FC = () => {
       dispatch({ type: 'SET_USER', payload: { ...data.user, token: authToken } as any });
       navigate('/dashboard/live');
     } catch (err: any) {
-      setError('Failed to change password');
+      notify('Failed to change password', 'error');
       setLoading(false);
     }
   };

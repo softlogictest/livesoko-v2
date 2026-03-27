@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppContext';
 import { API, fetchWithAuth } from '../lib/api';
 
 export const Settings: React.FC = () => {
-  const { state, dispatch } = useAppContext();
+  const { state, dispatch, notify } = useAppContext();
   const [profile, setProfile] = useState<any>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [sheetUrl, setSheetUrl] = useState('');
@@ -36,9 +36,11 @@ export const Settings: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sheet_url: sheetUrl })
       });
-      alert('Google Sheet URL updated!');
+      notify('Google Sheet URL updated!', 'success');
       fetchProfile();
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      notify('Failed to update Sheet URL', 'error');
+    }
   };
 
   const [newStaffEmail, setNewStaffEmail] = useState('');
@@ -57,12 +59,15 @@ export const Settings: React.FC = () => {
       if (res.ok) {
         setNewStaffEmail('');
         setNewStaffPass('');
+        notify('Staff account created!', 'success');
         fetchProfile();
       } else {
         const data = await res.json();
-        alert(data.error || 'Failed to create staff account');
+        notify(data.error || 'Failed to create staff account', 'error');
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      notify('An error occurred during staff creation', 'error');
+    }
     setCreatingStaff(false);
   };
 
