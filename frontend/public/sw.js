@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dukalive-pwa-v2';
+const CACHE_NAME = 'vibesoko-pwa-v1';
 const ASSETS = [
   '/',
   '/index.html',
