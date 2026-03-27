@@ -148,7 +148,7 @@ export const Login: React.FC = () => {
       <div className="w-full max-w-sm">
         <div className="text-center mb-10 text-brand-primary">
           <h1 className="font-display font-bold text-5xl tracking-wider mb-2">DukaLive</h1>
-          <p className="font-body text-text-secondary text-sm uppercase tracking-widest">Order Management System</p>
+          <p className="font-body text-text-secondary text-sm uppercase tracking-widest">v2.1.0-cloud • 2026-03-27</p>
         </div>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
