@@ -4,13 +4,15 @@ import { useHaptics } from './useHaptics';
 import { API } from '../App';
 
 export const useRealtime = () => {
-  const { dispatch } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const { pulse, alert } = useHaptics();
   const eventSourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
+    if (!state.user?.token) return;
+
     // Connect to SSE endpoint
-    const sseUrl = `${API}/api/events`;
+    const sseUrl = `${API}/api/events?token=${state.user.token}`;
     const es = new EventSource(sseUrl);
     eventSourceRef.current = es;
 

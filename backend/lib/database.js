@@ -248,7 +248,7 @@ function init() {
     db.prepare(`
       INSERT INTO profiles (id, email, password_hash, must_change_password, role, shop_name, webhook_token)
       VALUES (?, ?, ?, 1, 'seller', 'My VibeSoko Shop', ?)
-    `).run(id, 'seller@dukalive.local', hash, token);
+    `).run(id, 'seller@vibesoko.local', hash, token);
 
     console.log('');
     console.log('╔════════════════════════════════════════════╗');
