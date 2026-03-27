@@ -63,7 +63,7 @@ router.post('/handymen', async (req, res) => {
     }
 
     const id = uuidv4();
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 12); // Pillar 1: Strong Hashing (cost 12)
     const webhook_token = 'tok_' + require('crypto').randomBytes(6).toString('hex');
 
     db.prepare(`

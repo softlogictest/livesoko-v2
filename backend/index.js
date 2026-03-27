@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const os = require('os');
@@ -11,14 +13,41 @@ const db = initDb();
 
 const app = express();
 
+// Security Pillar 6: Trust Proxy (Crucial for Railway/Load Balancers)
+app.set('trust proxy', 1);
+
+// Security Pillar 5: Helmet for Secure Headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Turned off for dev simplicity, but can be hardened later
+}));
+
+// Security Pillar 6: Combined Audit Logging
+app.use(morgan('combined'));
+
 // Middleware
-// Rate Limiting: 100 requests per 15 mins per IP (basic protection)
+// Rate Limiting (Standard)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: { error: 'Too many requests, please try again later.' }
 });
+
+// Security Pillar 1 & 5: Granular Rate Limiting for Auth
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Too many login attempts. Please wait 15 minutes.' }
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 3,
+  message: { error: 'Too many accounts created. Please wait 1 hour.' }
+});
+
 app.use('/api/', limiter);
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/register', registerLimiter);
 
 // CORS Lockdown
 const domain = process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : '*';
@@ -50,23 +79,6 @@ app.post('/api/orders/webhook', (req, res, next) => {
   req.user = null; // Explicitly no user
   ordersRouter.handle(req, res, next);
 });
-
-
-
-
-// Ensure handyman test account exists
-const bcrypt = require('bcryptjs');
-const handymanPass = bcrypt.hashSync('12345678', 10);
-db.prepare(`
-  INSERT OR IGNORE INTO profiles (id, email, password_hash, role, shop_name)
-  VALUES (?, ?, ?, ?, ?)
-`).run(
-  'handyman-id-001',
-  'handyman@vibesoko.local',
-  handymanPass,
-  'handyman',
-  'VibeSoko Sample Shop'
-);
 
 // Serve React frontend
 // Railway build puts it in backend/public; local dev has it in frontend/dist

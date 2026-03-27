@@ -242,19 +242,21 @@ function init() {
   const existing = db.prepare('SELECT id FROM profiles LIMIT 1').get();
   if (!existing) {
     const id = crypto.randomUUID();
-    const hash = bcrypt.hashSync('vibesoko', 10);
+    const defaultEmail = process.env.DEFAULT_SELLER_EMAIL || 'admin@vibesoko.local';
+    const defaultPass = process.env.DEFAULT_SELLER_PASS || 'VibeSoko#2026!'; // Strong default
+    const hash = bcrypt.hashSync(defaultPass, 12); 
     const token = 'tok_' + crypto.randomBytes(6).toString('hex');
 
     db.prepare(`
       INSERT INTO profiles (id, email, password_hash, must_change_password, role, shop_name, webhook_token)
-      VALUES (?, ?, ?, 1, 'seller', 'My VibeSoko Shop', ?)
-    `).run(id, 'seller@vibesoko.local', hash, token);
+      VALUES (?, ?, ?, 1, 'seller', 'VibeSoko Master Shop', ?)
+    `).run(id, defaultEmail, hash, token);
 
     console.log('');
     console.log('╔════════════════════════════════════════════╗');
-    console.log('║  DEFAULT SELLER ACCOUNT CREATED            ║');
-    console.log('║  Email:    seller@vibesoko.local            ║');
-    console.log('║  Password: vibesoko                         ║');
+    console.log('║  INITIAL SELLER ACCOUNT CREATED            ║');
+    console.log(`║  Email:    ${defaultEmail.padEnd(31)} ║`);
+    console.log('║  Password: (Check your environment)        ║');
     console.log('║  (You will be forced to change on login)    ║');
     console.log('╚════════════════════════════════════════════╝');
     console.log('');

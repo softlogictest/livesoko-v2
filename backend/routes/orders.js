@@ -128,8 +128,10 @@ router.patch('/:id/fulfill', (req, res) => {
 // PATCH /api/orders/:id/flag — manually mark as FRAUD or REVIEW
 router.patch('/:id/flag', (req, res) => {
   const db = getDb();
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
-  if (!order) return res.status(404).json({ error: 'Order not found' });
+  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND seller_id = ?')
+    .get(req.params.id, req.user.shop_id);
+    
+  if (!order) return res.status(404).json({ error: 'Order not found or unauthorized' });
   if (order.status === 'FULFILLED') return res.status(400).json({ error: 'Cannot flag a fulfilled order' });
 
   const { status, reason } = req.body;
@@ -138,8 +140,8 @@ router.patch('/:id/flag', (req, res) => {
   }
 
   db.prepare(`
-    UPDATE orders SET status = ?, status_reason = ?, updated_at = datetime(?) WHERE id = ?
-  `).run(status, reason || 'Manually flagged by seller', new Date().toISOString(), req.params.id);
+    UPDATE orders SET status = ?, status_reason = ?, updated_at = datetime(?) WHERE id = ? AND seller_id = ?
+  `).run(status, reason || 'Manually flagged by seller', new Date().toISOString(), req.params.id, req.user.shop_id);
 
   const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   broadcast('order:updated', updated);
@@ -149,15 +151,17 @@ router.patch('/:id/flag', (req, res) => {
 // PATCH /api/orders/:id/unflag — restore a flagged order back to PENDING
 router.patch('/:id/unflag', (req, res) => {
   const db = getDb();
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
-  if (!order) return res.status(404).json({ error: 'Order not found' });
+  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND seller_id = ?')
+    .get(req.params.id, req.user.shop_id);
+    
+  if (!order) return res.status(404).json({ error: 'Order not found or unauthorized' });
   if (!['FRAUD', 'REVIEW'].includes(order.status)) {
     return res.status(400).json({ error: 'Only FRAUD or REVIEW orders can be unflagged' });
   }
 
   db.prepare(`
-    UPDATE orders SET status = 'PENDING', status_reason = 'Flag removed by seller', updated_at = datetime(?) WHERE id = ?
-  `).run(new Date().toISOString(), req.params.id);
+    UPDATE orders SET status = 'PENDING', status_reason = 'Flag removed by seller', updated_at = datetime(?) WHERE id = ? AND seller_id = ?
+  `).run(new Date().toISOString(), req.params.id, req.user.shop_id);
 
   const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   broadcast('order:updated', updated);
@@ -166,14 +170,15 @@ router.patch('/:id/unflag', (req, res) => {
 
 // POST /api/orders/:id/verify — manually mark as verified
 router.post('/:id/verify', (req, res) => {
-  console.log(`[Orders] PATCH /verify called for ID: ${req.params.id}`);
   const db = getDb();
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
-  if (!order) return res.status(404).json({ error: 'Order not found' });
+  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND seller_id = ?')
+    .get(req.params.id, req.user.shop_id);
+    
+  if (!order) return res.status(404).json({ error: 'Order not found or unauthorized' });
 
   db.prepare(`
-    UPDATE orders SET status = 'VERIFIED', status_reason = 'Manually verified', updated_at = datetime(?) WHERE id = ?
-  `).run(new Date().toISOString(), req.params.id);
+    UPDATE orders SET status = 'VERIFIED', status_reason = 'Manually verified', updated_at = datetime(?) WHERE id = ? AND seller_id = ?
+  `).run(new Date().toISOString(), req.params.id, req.user.shop_id);
 
   const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   broadcast('order:updated', updated);
@@ -184,8 +189,10 @@ router.post('/:id/verify', (req, res) => {
 router.patch('/:id', (req, res) => {
   const { buyer_name, buyer_phone, delivery_location, item_name, unit_price } = req.body;
   const db = getDb();
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
-  if (!order) return res.status(404).json({ error: 'Order not found' });
+  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND seller_id = ?')
+    .get(req.params.id, req.user.shop_id);
+    
+  if (!order) return res.status(404).json({ error: 'Order not found or unauthorized' });
 
   db.prepare(`
     UPDATE orders SET 
@@ -195,7 +202,7 @@ router.patch('/:id', (req, res) => {
       item_name = COALESCE(?, item_name),
       unit_price = COALESCE(?, unit_price),
       updated_at = datetime(?) 
-    WHERE id = ?
+    WHERE id = ? AND seller_id = ?
   `).run(
     buyer_name,
     buyer_phone,
@@ -203,7 +210,8 @@ router.patch('/:id', (req, res) => {
     item_name,
     unit_price,
     new Date().toISOString(),
-    req.params.id
+    req.params.id,
+    req.user.shop_id
   );
 
   const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
@@ -214,8 +222,10 @@ router.patch('/:id', (req, res) => {
 // DELETE /api/orders/:id — remove a mistaken order
 router.delete('/:id', (req, res) => {
   const db = getDb();
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
-  if (!order) return res.status(404).json({ error: 'Order not found' });
+  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND seller_id = ?')
+    .get(req.params.id, req.user.shop_id);
+    
+  if (!order) return res.status(404).json({ error: 'Order not found or unauthorized' });
 
   db.prepare('DELETE FROM orders WHERE id = ? AND seller_id = ?').run(req.params.id, req.user.shop_id);
   broadcast('order:deleted', { id: req.params.id });

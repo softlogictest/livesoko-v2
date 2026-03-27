@@ -3,31 +3,38 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { getDb } = require('../lib/database');
+const { body, validationResult } = require('express-validator');
+
+// Password complexity regex: 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // POST /api/auth/register
-router.post('/register', (req, res) => {
-  const { email, password, shop_name } = req.body;
-  if (!email || !password || !shop_name) {
-    return res.status(400).json({ error: 'Email, password, and shop name are required' });
-  }
+router.post('/register', [
+  body('email').isEmail().withMessage('Enter a valid email').normalizeEmail(),
+  body('password').matches(pwdRegex).withMessage('Password must be 8+ chars and include Uppercase, Lowercase, Number, and Special Character (@$!%*?&).'),
+  body('shop_name').trim().notEmpty().withMessage('Shop name is required').isLength({ max: 50 }).escape()
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
+  const { email, password, shop_name } = req.body;
   const db = getDb();
   
   // Check if email already exists
-  const existing = db.prepare('SELECT id FROM profiles WHERE email = ?').get(email.toLowerCase().trim());
+  const existing = db.prepare('SELECT id FROM profiles WHERE email = ?').get(email);
   if (existing) {
     return res.status(400).json({ error: 'Email already in use' });
   }
 
   try {
     const id = crypto.randomUUID();
-    const hash = bcrypt.hashSync(password, 10);
+    const hash = await bcrypt.hash(password, 12); // Pillar 1: Strong Hashing (cost 12)
     const webhookToken = 'tok_' + crypto.randomBytes(6).toString('hex');
 
     db.prepare(`
       INSERT INTO profiles (id, email, password_hash, must_change_password, role, shop_name, webhook_token)
       VALUES (?, ?, ?, 0, 'seller', ?, ?)
-    `).run(id, email.toLowerCase().trim(), hash, shop_name, webhookToken);
+    `).run(id, email, hash, shop_name, webhookToken);
 
     // Auto-login after registration
     const token = crypto.randomBytes(32).toString('hex');
@@ -43,12 +50,16 @@ router.post('/register', (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+router.post('/login', [
+  body('email').isEmail().normalizeEmail(),
+  body('password').notEmpty()
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(401).json({ error: 'Invalid credentials' });
 
+  const { email, password } = req.body;
   const db = getDb();
-  const user = db.prepare('SELECT * FROM profiles WHERE email = ?').get(email.toLowerCase().trim());
+  const user = db.prepare('SELECT * FROM profiles WHERE email = ?').get(email);
 
   if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
@@ -65,7 +76,12 @@ router.post('/login', (req, res) => {
 });
 
 // POST /api/auth/change-password
-router.post('/change-password', (req, res) => {
+router.post('/change-password', [
+  body('new_password').matches(pwdRegex).withMessage('Password must be 8+ chars and include Uppercase, Lowercase, Number, and Special Character (@$!%*?&).')
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -79,11 +95,7 @@ router.post('/change-password', (req, res) => {
   if (!auth) return res.status(401).json({ error: 'Invalid token' });
 
   const { new_password } = req.body;
-  if (!new_password || new_password.length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters' });
-  }
-
-  const hash = bcrypt.hashSync(new_password, 10);
+  const hash = await bcrypt.hash(new_password, 12);
   db.prepare('UPDATE profiles SET password_hash = ?, must_change_password = 0, updated_at = datetime(?) WHERE id = ?')
     .run(hash, new Date().toISOString(), auth.id);
 

@@ -3,8 +3,8 @@
 // Trigger: onFormSubmit (Form Submit event)
 // ============================================================
 
-const VIBESOKO_URL = "http://YOUR_IP_HERE:3000/api/orders"; // Your LAN IP (check VibeSoko banner)
-const WEBHOOK_TOKEN = "YOUR_TOKEN_HERE"; // From VibeSoko Settings tab
+const VIBESOKO_URL = "https://YOUR_APP.up.railway.app/api/orders"; // Your Production or Local URL
+const WEBHOOK_TOKEN = "YOUR_WEBHOOK_TOKEN_HERE"; // From VibeSoko Settings tab
 
 function onFormSubmit(e) {
   const r = e.namedValues;
