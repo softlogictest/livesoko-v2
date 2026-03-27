@@ -1,4 +1,4 @@
--- DukaLive REPAIR script
+-- VibeSoko REPAIR script
 -- Run this in Supabase SQL Editor to fix PostgREST 503 (PGRST002)
 -- The SQL Editor uses a direct DB connection, NOT PostgREST, so it will work.
 
