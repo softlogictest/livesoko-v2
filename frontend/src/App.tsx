@@ -7,8 +7,10 @@ import { Settings } from './pages/Settings';
 import { Dispatch } from './pages/Dispatch';
 import { AppProvider, useAppContext } from './context/AppContext';
 
-// API base URL — same machine in dev, same origin in production
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// API base URL — same origin in production, localhost in development
+const API = import.meta.env.PROD 
+  ? '' 
+  : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
 
 export { API };
 

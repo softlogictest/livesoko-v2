@@ -33,13 +33,17 @@ git push -u origin main
 
 ---
 
-## Step 4: Add Persistence (CRITICAL)
-If you don't do this, your orders will disappear every time the app restarts!
-1. In your Railway project dashboard, click **+ New** (top right) → **Volume**.
-2. **If the name is RED**: Make sure you have selected your **Backend** service in the "Connect to Service" dropdown.
+1. In your Railway project, click **+ New** → **Volume**.
+2. **Select your Backend service** in the dropdown.
 3. Name it `dukalive-data`.
-4. Set **Mount Path** to `/app/dukalive.db` (this matches where Node.js puts the file).
+4. Set **Mount Path** to `/data`.
 5. Click **Save**.
+
+### Step 5: Final Variables
+Ensure these are set in your **Backend** service:
+- `DB_PATH` = `/data/dukalive.db`
+- `NODE_ENV` = `production`
+- `PORT` = `3000`
 
 ---
 
