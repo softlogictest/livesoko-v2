@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppContext';
 import { API } from '../App';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-export const SessionSummary: React.FC<{ sessionId: string; onDone: () => void }> = ({ sessionId, onDone }) => {
+export const SessionSummary: React.FC<{ sessionId: string; onDone?: () => void }> = ({ sessionId, onDone }) => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { state } = useAppContext();
