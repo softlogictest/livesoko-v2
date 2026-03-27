@@ -1,11 +1,10 @@
-// ============================================================
-// DukaLive — Google Apps Script
+// VibeSoko — Google Apps Script
 // Attach to your Google Form via Extensions > Apps Script
 // Trigger: onFormSubmit (Form Submit event)
 // ============================================================
 
-const DUKALIVE_URL = "http://192.168.0.101:3000/api/orders"; // Your LAN IP (check DukaLive banner)
-const WEBHOOK_TOKEN = "tok_dba7e8c11c4b"; // From DukaLive Settings tab
+const VIBESOKO_URL = "http://YOUR_IP_HERE:3000/api/orders"; // Your LAN IP (check VibeSoko banner)
+const WEBHOOK_TOKEN = "YOUR_TOKEN_HERE"; // From VibeSoko Settings tab
 
 function onFormSubmit(e) {
   const r = e.namedValues;
@@ -32,14 +31,14 @@ function onFormSubmit(e) {
   };
 
   try {
-    const res = UrlFetchApp.fetch(DUKALIVE_URL, {
+    const res = UrlFetchApp.fetch(VIBESOKO_URL, {
       method: "post",
       contentType: "application/json",
       payload: JSON.stringify(payload),
       muteHttpExceptions: true
     });
-    Logger.log("DukaLive response: " + res.getResponseCode() + " — " + res.getContentText());
+    Logger.log("VibeSoko response: " + res.getResponseCode() + " — " + res.getContentText());
   } catch (err) {
-    Logger.log("DukaLive error: " + err.toString());
+    Logger.log("VibeSoko error: " + err.toString());
   }
 }
