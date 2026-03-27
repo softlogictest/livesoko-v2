@@ -86,7 +86,7 @@ app.get('*', (req, res, next) => {
       // Frontend not built yet — show helpful message
       res.json({
         status: 'ok',
-        name: 'DukaLive API v2.1.0',
+        name: 'VibeSoko API v2.2.0',
         message: 'Backend is running. Build the frontend with: cd frontend && npm run build'
       });
     }
@@ -95,7 +95,7 @@ app.get('*', (req, res, next) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', name: 'DukaLive v2.1.0', mode: 'local' });
+  res.json({ status: 'ok', name: 'VibeSoko v2.2.0', mode: 'local' });
 });
 
 // Error handling
@@ -138,7 +138,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Port ${PORT} in use, trying ${altPort}...`);
     app.listen(altPort, '0.0.0.0', () => {
       const ip = getLocalIP();
-      console.log(`DukaLive v2.1.0 running at http://${ip}:${altPort}`);
+      console.log(`VibeSoko v2.2.0 running at http://${ip}:${altPort}`);
     });
   } else {
     throw err;
