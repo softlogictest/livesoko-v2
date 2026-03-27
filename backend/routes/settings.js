@@ -45,11 +45,18 @@ router.patch('/', [
 
   db.prepare(`UPDATE profiles SET ${updates.join(', ')} WHERE id = ?`).run(...params);
 
+  const updated = db.prepare('SELECT id, email, role, shop_name, tiktok_handle, mpesa_number, sheet_url FROM profiles WHERE id = ?').get(req.user.shop_id);
   res.json(updated);
 });
 
 // POST /api/settings/handymen — create a new handyman account
-router.post('/handymen', async (req, res) => {
+router.post('/handymen', [
+  body('email').isEmail().withMessage('Valid email required').normalizeEmail(),
+  body('password').isLength({ min: 8 }).withMessage('Password must be 8+ chars')
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   if (req.user.role !== 'seller') {
     return res.status(403).json({ error: 'Only sellers can create staff accounts' });
   }
