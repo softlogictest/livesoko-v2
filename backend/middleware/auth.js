@@ -38,7 +38,13 @@ const authenticate = (req, res, next) => {
 
   // Attach user (strip password hash)
   const { password_hash, expires_at, ...user } = row;
-  req.user = user;
+  
+  // Scoping: shop_id is always the ID of the master seller
+  req.user = {
+    ...user,
+    shop_id: user.role === 'seller' ? user.id : user.seller_id
+  };
+  
   next();
 };
 

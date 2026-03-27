@@ -100,7 +100,9 @@ function init() {
     CREATE INDEX IF NOT EXISTS idx_orders_session_id ON orders(session_id);
     CREATE INDEX IF NOT EXISTS idx_orders_seller_id ON orders(seller_id);
     CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+    CREATE INDEX IF NOT EXISTS idx_orders_mpesa_tx ON orders(mpesa_tx_code);
     CREATE INDEX IF NOT EXISTS idx_sessions_seller_status ON sessions(seller_id, status);
+    CREATE INDEX IF NOT EXISTS idx_sessions_created ON sessions(created_at);
     CREATE INDEX IF NOT EXISTS idx_sms_logs_seller_id ON sms_logs(seller_id);
     CREATE INDEX IF NOT EXISTS idx_profiles_seller_id ON profiles(seller_id);
     CREATE INDEX IF NOT EXISTS idx_auth_tokens_user ON auth_tokens(user_id);

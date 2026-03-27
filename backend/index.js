@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -11,7 +12,22 @@ const db = initDb();
 const app = express();
 
 // Middleware
-app.use(cors());
+// Rate Limiting: 100 requests per 15 mins per IP (basic protection)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: 'Too many requests, please try again later.' }
+});
+app.use('/api/', limiter);
+
+// CORS Lockdown
+const domain = process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : '*';
+app.use(cors({
+  origin: domain,
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // Auth middleware (import after db init)

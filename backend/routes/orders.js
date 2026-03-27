@@ -13,10 +13,10 @@ router.use((req, res, next) => {
 router.get('/', (req, res) => {
   const db = getDb();
   const { session_id, status } = req.query;
-  const sellerId = req.user.seller_id || req.user.id;
+  const shopId = req.user.shop_id;
 
   let query = 'SELECT * FROM orders WHERE seller_id = ?';
-  const params = [sellerId];
+  const params = [shopId];
 
   if (session_id) {
     query += ' AND session_id = ?';
@@ -51,10 +51,10 @@ router.post('/', (req, res) => {
     return res.status(401).json({ error: 'Auth or webhook_token required' });
   }
 
-  const sellerId = seller.seller_id || seller.id;
+  const shopId = seller.shop_id || seller.id;
 
   // Find active session
-  const session = db.prepare('SELECT * FROM sessions WHERE seller_id = ? AND status = ?').get(sellerId, 'active');
+  const session = db.prepare('SELECT * FROM sessions WHERE seller_id = ? AND status = ?').get(shopId, 'active');
   if (!session) return res.status(400).json({ error: 'No active session. Start a session first.' });
 
   // Normalize phone
@@ -72,7 +72,7 @@ router.post('/', (req, res) => {
       INSERT INTO orders (id, session_id, seller_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, payment_type, buyer_mpesa_name, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
-      id, session.id, sellerId,
+      id, session.id, shopId,
       buyer_name || 'Unknown',
       buyer_tiktok || '@unknown',
       phone,
@@ -98,8 +98,10 @@ router.post('/', (req, res) => {
 // PATCH /api/orders/:id/fulfill
 router.patch('/:id/fulfill', (req, res) => {
   const db = getDb();
-  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
-  if (!order) return res.status(404).json({ error: 'Order not found' });
+  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND seller_id = ?')
+    .get(req.params.id, req.user.shop_id);
+    
+  if (!order) return res.status(404).json({ error: 'Order not found or unauthorized' });
   if (!['VERIFIED', 'COD_PENDING'].includes(order.status)) {
     return res.status(400).json({ error: 'Only VERIFIED or COD_PENDING orders can be fulfilled' });
   }
@@ -205,7 +207,7 @@ router.delete('/:id', (req, res) => {
   const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   if (!order) return res.status(404).json({ error: 'Order not found' });
 
-  db.prepare('DELETE FROM orders WHERE id = ?').run(req.params.id);
+  db.prepare('DELETE FROM orders WHERE id = ? AND seller_id = ?').run(req.params.id, req.user.shop_id);
   broadcast('order:deleted', { id: req.params.id });
   res.json({ message: 'Order deleted' });
 });

@@ -7,24 +7,24 @@ const { startPolling, stopPolling } = require('../lib/sheetPoller');
 // POST /api/sessions — start a new session
 router.post('/', (req, res) => {
   const db = getDb();
-  const sellerId = req.user.id;
+  const shopId = req.user.shop_id;
   const { title } = req.body;
 
   // Check for existing active session
-  const active = db.prepare('SELECT * FROM sessions WHERE seller_id = ? AND status = ?').get(sellerId, 'active');
+  const active = db.prepare('SELECT * FROM sessions WHERE seller_id = ? AND status = ?').get(shopId, 'active');
   if (active) return res.status(400).json({ error: 'You already have an active session. End it first.' });
 
   const id = crypto.randomUUID();
   db.prepare(`
     INSERT INTO sessions (id, seller_id, title, status) VALUES (?, ?, ?, 'active')
-  `).run(id, sellerId, title || null);
+  `).run(id, shopId, title || null);
 
   const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(id);
 
   // Start Google Sheet polling if URL is configured
-  const seller = db.prepare('SELECT sheet_url FROM profiles WHERE id = ?').get(sellerId);
+  const seller = db.prepare('SELECT sheet_url FROM profiles WHERE id = ?').get(shopId);
   if (seller?.sheet_url) {
-    startPolling(seller.sheet_url, sellerId, id);
+    startPolling(seller.sheet_url, shopId, id);
   }
 
   res.status(201).json(session);
@@ -36,7 +36,7 @@ router.patch('/:id/end', (req, res) => {
 
   db.prepare(`
     UPDATE sessions SET status = 'ended', ended_at = datetime(?) WHERE id = ? AND seller_id = ?
-  `).run(new Date().toISOString(), req.params.id, req.user.id);
+  `).run(new Date().toISOString(), req.params.id, req.user.shop_id);
 
   stopPolling();
 
@@ -47,16 +47,18 @@ router.patch('/:id/end', (req, res) => {
 // GET /api/sessions — list sessions
 router.get('/', (req, res) => {
   const db = getDb();
-  const sellerId = req.user.seller_id || req.user.id;
-  const sessions = db.prepare('SELECT * FROM sessions WHERE seller_id = ? ORDER BY created_at DESC').all(sellerId);
+  const shopId = req.user.shop_id;
+  const sessions = db.prepare('SELECT * FROM sessions WHERE seller_id = ? ORDER BY created_at DESC').all(shopId);
   res.json(sessions);
 });
 
 // GET /api/sessions/:id/summary — session analytics
 router.get('/:id/summary', (req, res) => {
   const db = getDb();
-  const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(req.params.id);
-  if (!session) return res.status(404).json({ error: 'Session not found' });
+  const session = db.prepare('SELECT * FROM sessions WHERE id = ? AND seller_id = ?')
+    .get(req.params.id, req.user.shop_id);
+    
+  if (!session) return res.status(404).json({ error: 'Session not found or unauthorized' });
 
   const orders = db.prepare('SELECT * FROM orders WHERE session_id = ?').all(req.params.id);
 
