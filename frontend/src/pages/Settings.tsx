@@ -72,7 +72,7 @@ export const Settings: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('dukalive_token');
+    localStorage.removeItem('vibesoko_token');
     dispatch({ type: 'SET_USER', payload: null });
   };
 

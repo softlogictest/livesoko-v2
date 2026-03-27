@@ -46,7 +46,7 @@ export const Login: React.FC = () => {
       }
 
       // Login successful
-      localStorage.setItem('dukalive_token', data.token);
+      localStorage.setItem('vibesoko_token', data.token);
       dispatch({ type: 'SET_USER', payload: { ...data.user, token: data.token } as any });
       navigate('/dashboard/live');
     } catch (err: any) {
@@ -74,7 +74,7 @@ export const Login: React.FC = () => {
         return;
       }
 
-      localStorage.setItem('dukalive_token', data.token);
+      localStorage.setItem('vibesoko_token', data.token);
       dispatch({ type: 'SET_USER', payload: { ...data.user, token: data.token } as any });
       notify('Welcome to VibeSoko!', 'success');
       navigate('/dashboard/live');
@@ -118,7 +118,7 @@ export const Login: React.FC = () => {
       }
 
       // Password changed — now login
-      localStorage.setItem('dukalive_token', authToken);
+      localStorage.setItem('vibesoko_token', authToken);
       dispatch({ type: 'SET_USER', payload: { ...data.user, token: authToken } as any });
       navigate('/dashboard/live');
     } catch (err: any) {

@@ -149,7 +149,7 @@ export const LiveFeed: React.FC = () => {
     return (
       <div className="min-h-screen bg-bg-base flex flex-col">
         <div className="bg-bg-surface border-b border-border-subtle p-4 sticky top-0 z-40">
-          <h1 className="font-display font-bold text-brand-primary text-xl">DukaLive</h1>
+          <h1 className="font-display font-bold text-brand-primary text-xl">VibeSoko</h1>
         </div>
         <SessionSummary sessionId={endedSessionId} onDone={() => setEndedSessionId(null)} />
       </div>

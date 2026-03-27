@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const crypto = require('crypto');
 
-// DB_PATH env var lets Railway point this at a persistent volume (/data/dukalive.db)
-// Falls back to the local dukalive.db in development
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'dukalive.db');
+// DB_PATH env var lets Railway point this at a persistent volume (/data/vibesoko.db)
+// Falls back to the local vibesoko.db in development
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'vibesoko.db');
 let db;
 
 function init() {
@@ -242,7 +242,7 @@ function init() {
   const existing = db.prepare('SELECT id FROM profiles LIMIT 1').get();
   if (!existing) {
     const id = crypto.randomUUID();
-    const hash = bcrypt.hashSync('dukalive', 10);
+    const hash = bcrypt.hashSync('vibesoko', 10);
     const token = 'tok_' + crypto.randomBytes(6).toString('hex');
 
     db.prepare(`
@@ -253,8 +253,8 @@ function init() {
     console.log('');
     console.log('╔════════════════════════════════════════════╗');
     console.log('║  DEFAULT SELLER ACCOUNT CREATED            ║');
-    console.log('║  Email:    seller@dukalive.local            ║');
-    console.log('║  Password: dukalive                         ║');
+    console.log('║  Email:    seller@vibesoko.local            ║');
+    console.log('║  Password: vibesoko                         ║');
     console.log('║  (You will be forced to change on login)    ║');
     console.log('╚════════════════════════════════════════════╝');
     console.log('');

@@ -123,7 +123,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   const ip = getLocalIP();
   console.log('');
   console.log('╔══════════════════════════════════════════════════╗');
-  console.log('║              DukaLive v2.1.0 — LOCAL             ║');
+  console.log('║              VibeSoko v2.2.0 — LOCAL             ║');
   console.log('╠══════════════════════════════════════════════════╣');
   console.log(`║  On this PC:    http://localhost:${PORT}             ║`);
   console.log(`║  On WiFi/LAN:   http://${ip}:${PORT}       ║`);
