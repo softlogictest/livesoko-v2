@@ -22,7 +22,12 @@ const initialState: AppState = {
 function appReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_USER':
-      return { ...state, user: action.payload };
+      return { 
+        ...state, 
+        user: action.payload,
+        activeSession: null,
+        orders: []
+      };
     case 'SET_ACTIVE_SESSION':
       return { ...state, activeSession: action.payload };
     case 'SET_ORDERS':
