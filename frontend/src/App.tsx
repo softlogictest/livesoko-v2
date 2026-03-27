@@ -6,11 +6,7 @@ import { SessionDetail } from './pages/SessionDetail';
 import { Settings } from './pages/Settings';
 import { Dispatch } from './pages/Dispatch';
 import { AppProvider, useAppContext } from './context/AppContext';
-
-// API base URL — same origin in production, localhost in development
-const API = import.meta.env.PROD 
-  ? '' 
-  : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
+import { fetchWithAuth, API } from './lib/api';
 
 export { API };
 
@@ -78,9 +74,7 @@ const AppRoutes = () => {
     // Check for existing auth token in localStorage
     const token = localStorage.getItem('dukalive_token');
     if (token) {
-      fetch(`${API}/api/settings`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+      fetchWithAuth('/api/settings')
         .then(res => {
           if (res.ok) return res.json();
           throw new Error('Invalid token');

@@ -36,10 +36,47 @@ router.patch('/', (req, res) => {
 
   db.prepare(`UPDATE profiles SET ${updates.join(', ')} WHERE id = ?`).run(...params);
 
-  const updated = db.prepare('SELECT id, email, role, shop_name, tiktok_handle, mpesa_number, webhook_token, sheet_url FROM profiles WHERE id = ?')
-    .get(req.user.id);
-
   res.json(updated);
+});
+
+// POST /api/settings/handymen — create a new handyman account
+router.post('/handymen', async (req, res) => {
+  if (req.user.role !== 'seller') {
+    return res.status(403).json({ error: 'Only sellers can create staff accounts' });
+  }
+
+  const db = getDb();
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  try {
+    const { v4: uuidv4 } = require('uuid');
+    const bcrypt = require('bcryptjs');
+    
+    // Check if email already exists
+    const existing = db.prepare('SELECT id FROM profiles WHERE email = ?').get(email);
+    if (existing) {
+      return res.status(400).json({ error: 'User with this email already exists' });
+    }
+
+    const id = uuidv4();
+    const hash = await bcrypt.hash(password, 10);
+    const webhook_token = 'tok_' + require('crypto').randomBytes(6).toString('hex');
+
+    db.prepare(`
+      INSERT INTO profiles (id, email, password_hash, role, seller_id, shop_name, webhook_token)
+      VALUES (?, ?, ?, 'handyman', ?, ?, ?)
+    `).run(id, email, hash, req.user.id, req.user.shop_name, webhook_token);
+
+    const created = db.prepare('SELECT id, email, role, created_at FROM profiles WHERE id = ?').get(id);
+    res.status(201).json(created);
+  } catch (err) {
+    console.error('Error creating handyman:', err);
+    res.status(500).json({ error: 'Failed to create account' });
+  }
 });
 
 module.exports = router;

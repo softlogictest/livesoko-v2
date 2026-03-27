@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { API } from '../App';
+import { API, fetchWithAuth } from '../lib/api';
 
 export const Settings: React.FC = () => {
   const { state, dispatch } = useAppContext();
@@ -11,9 +11,7 @@ export const Settings: React.FC = () => {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch(`${API}/api/settings`, {
-        headers: { 'Authorization': `Bearer ${state.user?.token}` }
-      });
+      const res = await fetchWithAuth('/api/settings');
       if (res.ok) {
         const data = await res.json();
         setProfile(data);
@@ -33,17 +31,39 @@ export const Settings: React.FC = () => {
   const handleUpdateSheet = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch(`${API}/api/settings`, {
+      await fetchWithAuth('/api/settings', {
         method: 'PATCH',
-        headers: { 
-          'Authorization': `Bearer ${state.user?.token}`, 
-          'Content-Type': 'application/json' 
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sheet_url: sheetUrl })
       });
       alert('Google Sheet URL updated!');
       fetchProfile();
     } catch (e) { console.error(e); }
+  };
+
+  const [newStaffEmail, setNewStaffEmail] = useState('');
+  const [newStaffPass, setNewStaffPass] = useState('');
+  const [creatingStaff, setCreatingStaff] = useState(false);
+
+  const handleAddStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreatingStaff(true);
+    try {
+      const res = await fetchWithAuth('/api/settings/handymen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newStaffEmail, password: newStaffPass })
+      });
+      if (res.ok) {
+        setNewStaffEmail('');
+        setNewStaffPass('');
+        fetchProfile();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to create staff account');
+      }
+    } catch (e) { console.error(e); }
+    setCreatingStaff(false);
   };
 
   const handleLogout = () => {
@@ -87,15 +107,49 @@ export const Settings: React.FC = () => {
       </div>
 
       <div className="bg-bg-surface p-5 rounded-lg border border-border-subtle mb-6">
-        <h3 className="text-sm text-text-muted uppercase mb-4">Shop Profile</h3>
-        <div className="mb-3">
-          <label className="text-xs text-text-secondary block mb-1">Shop Name</label>
-          <div className="text-lg">{profile?.seller.shop_name || 'Not set'}</div>
-        </div>
-        <div className="mb-3">
-          <label className="text-xs text-text-secondary block mb-1">Email</label>
-          <div className="text-lg">{profile?.seller.email}</div>
-        </div>
+        <h3 className="text-sm text-text-muted uppercase mb-4">Staff Management</h3>
+        
+        {profile?.handymen.length > 0 && (
+          <div className="mb-6 flex flex-col gap-2">
+            {profile.handymen.map((staff: any) => (
+              <div key={staff.id} className="flex items-center justify-between bg-bg-base/50 p-3 rounded border border-border-subtle/30">
+                <div>
+                  <div className="text-sm font-bold text-text-primary">{staff.email}</div>
+                  <div className="text-[10px] text-text-muted uppercase tracking-widest">{staff.role}</div>
+                </div>
+                <div className="text-[10px] text-text-muted">ID: {staff.id.slice(0,8)}...</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <form onSubmit={handleAddStaff} className="flex flex-col gap-3">
+          <p className="text-xs text-text-secondary mb-1">Create an account for your team members (e.g. handymen).</p>
+          <input 
+            type="email" 
+            value={newStaffEmail}
+            onChange={e => setNewStaffEmail(e.target.value)}
+            placeholder="Staff Email"
+            className="bg-bg-input border border-border-subtle p-3 rounded text-sm text-text-primary"
+            required
+          />
+          <input 
+            type="password" 
+            value={newStaffPass}
+            onChange={e => setNewStaffPass(e.target.value)}
+            placeholder="Initial Password"
+            className="bg-bg-input border border-border-subtle p-3 rounded text-sm text-text-primary"
+            required
+            minLength={6}
+          />
+          <button 
+            type="submit" 
+            disabled={creatingStaff}
+            className="bg-brand-primary text-black px-4 py-3 rounded text-sm font-bold transition-transform active:scale-[0.98] disabled:opacity-50"
+          >
+            {creatingStaff ? 'CREATING...' : 'ADD STAFF MEMBER'}
+          </button>
+        </form>
       </div>
 
       <button onClick={handleLogout} className="w-full py-4 text-status-fraud border border-status-fraud rounded font-bold tracking-widest font-display text-lg">

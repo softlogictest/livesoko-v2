@@ -5,7 +5,7 @@ import { ManualOrderModal } from '../components/ManualOrderModal';
 import { SessionSummary } from '../components/SessionSummary';
 import { useRealtime } from '../hooks/useRealtime';
 import { useAppContext } from '../context/AppContext';
-import { API } from '../App';
+import { API, fetchWithAuth } from '../lib/api';
 
 export const LiveFeed: React.FC = () => {
   const { state, dispatch } = useAppContext();
@@ -23,9 +23,7 @@ export const LiveFeed: React.FC = () => {
 
       try {
         // Fetch active session
-        const resSession = await fetch(`${API}/api/sessions`, {
-          headers: { 'Authorization': `Bearer ${state.user.token}` }
-        });
+        const resSession = await fetchWithAuth('/api/sessions');
         
         if (resSession.ok) {
           const sessions = await resSession.json();
@@ -35,9 +33,7 @@ export const LiveFeed: React.FC = () => {
             dispatch({ type: 'SET_ACTIVE_SESSION', payload: activeSession });
             
             // Fetch orders for this session using backend
-            const resOrders = await fetch(`${API}/api/orders?session_id=${activeSession.id}`, {
-              headers: { 'Authorization': `Bearer ${state.user.token}` }
-            });
+            const resOrders = await fetchWithAuth(`/api/orders?session_id=${activeSession.id}`);
             
             if (resOrders.ok) {
               const orders = await resOrders.json();
@@ -104,12 +100,9 @@ export const LiveFeed: React.FC = () => {
 
   const handleStartSession = async () => {
     try {
-      const res = await fetch(`${API}/api/sessions`, {
+      const res = await fetchWithAuth('/api/sessions', {
         method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${state.user?.token}`,
-          'Content-Type': 'application/json' 
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: 'New Live' })
       });
       if (res.ok) {
@@ -127,12 +120,9 @@ export const LiveFeed: React.FC = () => {
 
   const handleManualOrder = async (data: { buyer_name: string; item_name: string; unit_price: string; quantity: string; delivery_location: string; buyer_phone: string; payment_type: 'MPESA' | 'COD'; buyer_mpesa_name?: string }) => {
     try {
-      await fetch(`${API}/api/orders`, {
+      await fetchWithAuth('/api/orders', {
         method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${state.user?.token}`,
-          'Content-Type': 'application/json' 
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           buyer_name: data.buyer_name,
           buyer_tiktok: '@manual',

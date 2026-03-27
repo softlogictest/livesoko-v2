@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { API } from '../App';
+import { fetchWithAuth } from '../lib/api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export const SessionSummary: React.FC<{ sessionId: string; onDone?: () => void }> = ({ sessionId, onDone }) => {
