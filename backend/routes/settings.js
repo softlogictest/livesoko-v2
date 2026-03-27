@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDb } = require('../lib/database');
+const { body, validationResult } = require('express-validator');
 
 // GET /api/settings — get seller's settings
 router.get('/', (req, res) => {
@@ -16,7 +17,15 @@ router.get('/', (req, res) => {
 });
 
 // PATCH /api/settings — update seller settings
-router.patch('/', (req, res) => {
+router.patch('/', [
+  body('shop_name').optional().trim().isLength({ max: 50 }).escape(),
+  body('tiktok_handle').optional().trim().isLength({ max: 30 }).escape(),
+  body('mpesa_number').optional().trim().isLength({ max: 15 }).escape(),
+  body('sheet_url').optional().isURL().withMessage('Invalid Sheet URL')
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   const db = getDb();
   const { shop_name, tiktok_handle, mpesa_number, sheet_url } = req.body;
 

@@ -3,9 +3,15 @@ const router = express.Router();
 const crypto = require('crypto');
 const { getDb } = require('../lib/database');
 const { startPolling, stopPolling } = require('../lib/sheetPoller');
+const { body, validationResult } = require('express-validator');
 
 // POST /api/sessions — start a new session
-router.post('/', (req, res) => {
+router.post('/', [
+  body('title').optional().trim().isLength({ max: 100 }).escape()
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   const db = getDb();
   const shopId = req.user.shop_id;
   const { title } = req.body;
@@ -60,7 +66,7 @@ router.get('/:id/summary', (req, res) => {
     
   if (!session) return res.status(404).json({ error: 'Session not found or unauthorized' });
 
-  const orders = db.prepare('SELECT * FROM orders WHERE session_id = ?').all(req.params.id);
+  const orders = db.prepare('SELECT * FROM orders WHERE session_id = ? AND seller_id = ?').all(req.params.id, req.user.shop_id);
 
   const total_orders = orders.length;
   const verified = orders.filter(o => o.status === 'VERIFIED').length;
