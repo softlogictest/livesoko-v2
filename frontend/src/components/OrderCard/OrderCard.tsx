@@ -70,7 +70,7 @@ export const OrderCard: React.FC<{ order: OrderCardProps }> = ({ order }) => {
             <a href={`tel:${order.buyer_phone}`} onClick={e => e.stopPropagation()} className="p-2 rounded-full bg-bg-elevated text-status-verified">
               📞
             </a>
-            <a href={`https://wa.me/${order.buyer_phone && order.buyer_phone.replace('+', '')}?text=Hi, I placed an order on DukaLive. Please confirm delivery details.`} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} className="p-2 rounded-full bg-bg-elevated text-[#25D366]">
+            <a href={`https://wa.me/${order.buyer_phone && order.buyer_phone.replace('+', '')}?text=Hi, I placed an order on VibeSoko. Please confirm delivery details.`} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} className="p-2 rounded-full bg-bg-elevated text-[#25D366]">
               💬
             </a>
           </div>
