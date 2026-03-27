@@ -12,7 +12,7 @@ export const API = import.meta.env.PROD
  * 3. Handles 401 Unauthorized by clearing local session
  */
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('dukalive_token');
+  const token = localStorage.getItem('vibesoko_token');
   
   const headers = new Headers(options.headers || {});
   if (token) {
@@ -38,7 +38,7 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
     // Session expired or invalid
     const data = await response.clone().json().catch(() => ({}));
     if (data.code === 'TOKEN_EXPIRED' || data.code === 'UNAUTHORIZED') {
-      localStorage.removeItem('dukalive_token');
+      localStorage.removeItem('vibesoko_token');
       // We don't want to force a reload here, but the next ProtectedRoute check will catch it
     }
   }
