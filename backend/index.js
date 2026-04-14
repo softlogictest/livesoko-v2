@@ -69,9 +69,15 @@ app.use('/api/orders/webhook', webhookLimiter);
 app.use('/api/sms/', smsLimiter);
 
 // CORS Lockdown
-const domain = process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : '*';
+const domain = process.env.RAILWAY_PUBLIC_DOMAIN 
+  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
+  : (process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : '*');
+
+console.log(`[AUTH] CORS allowing origin: ${domain}`);
+
 app.use(cors({
   origin: domain,
+  credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-shop-id']
 }));

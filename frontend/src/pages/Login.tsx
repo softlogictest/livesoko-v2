@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { API } from '../lib/api';
 
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const PWD_REGEX = /^.{8,}$/;
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -63,7 +63,7 @@ export const Login: React.FC = () => {
     
     // Pillar: Sync validation with backend
     if (!PWD_REGEX.test(password)) {
-      return notify('Password must be 8+ chars (Uppercase, Lowercase, Number, Special)', 'error');
+      return notify('Password must be at least 8 characters', 'error');
     }
 
     setLoading(true);
@@ -108,7 +108,7 @@ export const Login: React.FC = () => {
       return;
     }
     if (!PWD_REGEX.test(newPassword)) {
-      setError('Password must be 8+ chars and include Uppercase, Lowercase, Number, and Special Character.');
+      setError('Password must be at least 8 characters');
       return;
     }
 

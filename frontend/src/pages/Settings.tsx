@@ -401,7 +401,7 @@ export const Settings: React.FC = () => {
                   placeholder="Initial Password"
                   className="bg-bg-input border border-border-subtle p-3 rounded text-sm text-text-primary outline-none focus:border-brand-primary"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
                 <select 
                   value={newStaffRole}

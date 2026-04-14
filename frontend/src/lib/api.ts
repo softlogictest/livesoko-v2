@@ -1,10 +1,7 @@
 import { AppState } from '../types';
 
-// API base URL — same origin in production, localhost in development
-// API base URL — same origin in production, dynamic or hardcoded in development
-export const API = import.meta.env.PROD 
-  ? '' 
-  : (import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000`);
+// API base URL — use relative paths for everything (standard PWA/Vite practice)
+export const API = import.meta.env.VITE_API_URL || '';
 
 /**
  * Enhanced fetch wrapper that:
