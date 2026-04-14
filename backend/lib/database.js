@@ -239,6 +239,21 @@ function init() {
     console.log('[DB] Bad foreign keys fixed.');
   }
 
+
+  // --- MIGRATION: Phase 3 (Fix missing slug/color_scheme columns in shops table) ---
+  let shopCols = [];
+  try {
+    shopCols = db.prepare("PRAGMA table_info(shops)").all().map(c => c.name);
+  } catch(e) {}
+  
+  if (shopCols.length > 0 && !shopCols.includes('slug')) {
+    console.log('[DB] Adding missing slug and color_scheme columns to shops table...');
+    db.exec(`
+      ALTER TABLE shops ADD COLUMN slug TEXT UNIQUE;
+      ALTER TABLE shops ADD COLUMN color_scheme TEXT DEFAULT 'acid-green';
+    `);
+  }
+
   // Ensure current tables exist for totally new instances
   db.exec(`
     CREATE TABLE IF NOT EXISTS profiles (
@@ -262,6 +277,8 @@ function init() {
       id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
       owner_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
+      slug TEXT UNIQUE,
+      color_scheme TEXT DEFAULT 'acid-green',
       webhook_token TEXT UNIQUE,
       sheet_url TEXT,
       tier TEXT NOT NULL DEFAULT 'trial' CHECK (tier IN ('trial', 'shop', 'suite')),

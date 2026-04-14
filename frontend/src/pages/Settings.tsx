@@ -251,20 +251,27 @@ export const Settings: React.FC = () => {
               <h3 className="text-sm text-brand-primary uppercase mb-4 tracking-widest font-bold">Public Order Page</h3>
               <p className="text-xs text-text-secondary mb-3">Copy this link and put it in your TikTok bio! Customers can use it to place orders without needing Google Forms.</p>
               
-              <div className="flex gap-2">
-                <div className="flex-1 bg-bg-base p-3 rounded text-[11px] break-all text-brand-primary border border-brand-primary/20 font-mono">
-                  {window.location.origin}/@{profile?.seller.slug}
+              {profile?.seller?.slug ? (
+                <div className="flex gap-2">
+                  <div className="flex-1 bg-bg-base p-3 rounded text-[11px] break-all text-brand-primary border border-brand-primary/20 font-mono">
+                    {window.location.origin}/@{profile?.seller.slug}
+                  </div>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/@${profile?.seller.slug}`);
+                      notify('Link copied to clipboard!', 'success');
+                    }}
+                    className="bg-brand-primary text-black px-4 rounded font-bold text-xs hover:bg-brand-dim transition-colors"
+                  >
+                    COPY
+                  </button>
                 </div>
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/@${profile?.seller.slug}`);
-                    notify('Link copied to clipboard!', 'success');
-                  }}
-                  className="bg-brand-primary text-black px-4 rounded font-bold text-xs"
-                >
-                  COPY
-                </button>
-              </div>
+              ) : (
+                <div className="bg-brand-primary/10 border border-brand-primary/30 p-3 rounded-lg text-center animate-pulse">
+                  <p className="text-brand-primary text-xs font-bold uppercase tracking-widest">⚠️ Link Not Ready</p>
+                  <p className="text-text-secondary text-[10px] mt-1">Please configure your Shop Slug below to generate your link.</p>
+                </div>
+              )}
 
               <div className="mt-6 space-y-4 pt-4 border-t border-border-subtle/50">
                 <div>

@@ -67,6 +67,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/dashboard/network" element={<ProtectedRoute requireManager><Network /></ProtectedRoute>} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/@:slug" element={<PublicOrderPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <NavBar />
       </div>
