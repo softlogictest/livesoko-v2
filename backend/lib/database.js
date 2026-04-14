@@ -405,15 +405,17 @@ function init() {
       console.log('[DB] sms_logs rebuilt with clean FK references.');
     }
   } catch (err) {
-    // If sms_logs doesn't exist or rebuild fails, just recreate it cleanly
+    console.warn('[DB] sms_logs check skipped or failed:', err.message);
+  }
+
   // Migration: add hosted page infrastructure (slugs and color schemes)
   const shopCols = db.prepare(`PRAGMA table_info(shops)`).all().map(c => c.name);
   if (!shopCols.includes('slug')) {
     console.log('[DB] Migrating: Adding hosted page columns (slug, color_scheme)...');
     db.exec(`
-      ALTER TABLE shops ADD COLUMN slug TEXT UNIQUE;
+      ALTER TABLE shops ADD COLUMN slug TEXT;
       ALTER TABLE shops ADD COLUMN color_scheme TEXT DEFAULT 'acid-green';
-      CREATE INDEX IF NOT EXISTS idx_shops_slug ON shops(slug);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_shops_slug ON shops(slug);
     `);
 
     // Backfill slugs for existing shops
