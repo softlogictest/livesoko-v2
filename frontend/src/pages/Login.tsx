@@ -34,7 +34,8 @@ export const Login: React.FC = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        notify(data.error || 'Login failed', 'error');
+        const errorMessage = data.error || (data.errors && data.errors[0]?.msg) || 'Login failed';
+        notify(errorMessage, 'error');
         setLoading(false);
         return;
       }
@@ -77,7 +78,8 @@ export const Login: React.FC = () => {
 
       const data = await res.json();
       if (!res.ok) {
-        notify(data.error || 'Registration failed', 'error');
+        const errorMessage = data.error || (data.errors && data.errors[0]?.msg) || 'Registration failed';
+        notify(errorMessage, 'error');
         setLoading(false);
         return;
       }
