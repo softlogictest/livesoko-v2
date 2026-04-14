@@ -1,38 +1,33 @@
 import { AppState } from '../types';
 
 // API base URL — same origin in production, localhost in development
+// API base URL — same origin in production, dynamic or hardcoded in development
 export const API = import.meta.env.PROD 
   ? '' 
-  : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
+  : (import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000`);
 
 /**
  * Enhanced fetch wrapper that:
  * 1. Automatically adds the Bearer token
- * 2. Checks for X-Token-Renewed header and updates localStorage
+ * 2. Automatically adds x-shop-id header
  * 3. Handles 401 Unauthorized by clearing local session
  */
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   const token = localStorage.getItem('livesoko_token');
+  const shopId = localStorage.getItem('livesoko_shop_id');
   
   const headers = new Headers(options.headers || {});
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
+  }
+  if (shopId) {
+    headers.set('x-shop-id', shopId);
   }
   
   const response = await fetch(`${API}${url}`, {
     ...options,
     headers
   });
-
-  // Handle silent token renewal
-  const renewedToken = response.headers.get('X-Token-Renewed');
-  if (renewedToken && renewedToken !== 'true') {
-     // If the header contains the actual new token string (if we decide to send it there)
-     // Or if we just want to signal renewal and get it from elsewhere.
-     // Current backend sets it to "true" and updates the DB, 
-     // but the token string ITSELF doesn't change in our current simple implementation.
-     // If we ever rotate tokens, we'd handle it here.
-  }
 
   if (response.status === 401 || response.status === 403) {
     // Session expired or invalid
@@ -41,6 +36,11 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
       localStorage.removeItem('livesoko_token');
       window.dispatchEvent(new CustomEvent('auth-error'));
     }
+  }
+
+  // Handle billing lockouts
+  if (response.status === 402) {
+    window.dispatchEvent(new CustomEvent('billing-error'));
   }
 
   return response;

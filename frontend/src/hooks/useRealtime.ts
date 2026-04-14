@@ -1,18 +1,20 @@
 import { useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useHaptics } from './useHaptics';
+import { useAudio } from './useAudio';
 import { API } from '../App';
 
 export const useRealtime = () => {
   const { state, dispatch } = useAppContext();
-  const { pulse, alert } = useHaptics();
+  const { pulse, alert: vibrateAlert } = useHaptics();
+  const { playSound } = useAudio();
   const eventSourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    if (!state.user?.token) return;
+    if (!state.user?.token || !state.activeShop?.id) return;
 
-    // Connect to SSE endpoint
-    const sseUrl = `${API}/api/events?token=${state.user.token}`;
+    // Connect to SSE endpoint with token and current shop context
+    const sseUrl = `${API}/api/events?token=${state.user.token}&shop_id=${state.activeShop.id}`;
     const es = new EventSource(sseUrl);
     eventSourceRef.current = es;
 
@@ -25,14 +27,30 @@ export const useRealtime = () => {
       const order = JSON.parse(e.data);
       dispatch({ type: 'UPDATE_ORDER', payload: order });
 
-      // Haptics based on status
-      if (order.status === 'VERIFIED') pulse();
-      else if (order.status === 'FRAUD') alert();
+      // Haptics & Audio based on status
+      if (order.status === 'VERIFIED') {
+        pulse();
+        playSound('success');
+      } else if (order.status === 'FRAUD') {
+        vibrateAlert();
+      }
     });
 
     es.addEventListener('order:deleted', (e) => {
       const { id } = JSON.parse(e.data);
       dispatch({ type: 'DELETE_ORDER', payload: { id } });
+    });
+    
+    es.addEventListener('payment:unmatched', (e) => {
+      const payment = JSON.parse(e.data);
+      dispatch({ type: 'ADD_UNMATCHED_PAYMENT', payload: payment });
+      vibrateAlert(); // Strong vibration for floating money
+      playSound('alert');
+    });
+
+    es.addEventListener('payment:linked', (e) => {
+      const { id } = JSON.parse(e.data);
+      dispatch({ type: 'REMOVE_UNMATCHED_PAYMENT', payload: id });
     });
 
     es.addEventListener('connected', () => {
@@ -47,5 +65,5 @@ export const useRealtime = () => {
       es.close();
       eventSourceRef.current = null;
     };
-  }, [dispatch, pulse, alert]);
+  }, [dispatch, pulse, alert, state.user?.token, state.activeShop?.id]);
 };

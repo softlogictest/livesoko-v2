@@ -32,5 +32,13 @@ Explore our detailed guides in the `/docs` folder:
 - Environment-based Secrets Management.
 - Granular Rate Limiting (Login, Register, Webhook, SMS, Global).
 
+## ✨ What's New (Enterprise Update v2.3.0)
+- **🔊 LiveSoko Senses**: Synthesized audio feedback for verified orders and unmatched payments.
+- **📊 Market Hero Dashboard**: Lifetime revenue, total orders, and AOV analytics on the History page.
+- **🛡️ Multi-Tenant 2.0**: Secure shop isolation with Owner/Manager/Seller role hierarchies.
+- **💰 Floating Cash System**: Robust "Catch-all" engine for unmatched M-Pesa payments.
+- **📱 LiveSoko Sync**: Dedicated Android app for background SMS verification.
+
 ---
 Built by **SoftLOGICtech** 🛡️🚀🏆
+*Version 2.3.0 — "The Enterprise Grand Finale"*

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { OrderCardProps } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { EditOrderModal } from '../EditOrderModal';
-import { API } from '../../App';
+import { API, fetchWithAuth } from '../../lib/api';
 
 export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void }> = ({ order, onClose }) => {
   const { state } = useAppContext();
@@ -10,12 +10,9 @@ export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void 
 
   const handleEdit = async (data: any) => {
     try {
-      await fetch(`${API}/api/orders/${order.id}`, {
+      await fetchWithAuth(`/api/orders/${order.id}`, {
         method: 'PATCH',
-        headers: { 
-          'Authorization': `Bearer ${state.user?.token}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
       setShowEditModal(false);
@@ -26,26 +23,24 @@ export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void 
 
   const handleFulfill = async () => {
     if (order.status !== 'VERIFIED' && order.status !== 'COD_PENDING') return;
-    await fetch(`${API}/api/orders/${order.id}/fulfill`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${state.user?.token}` }
+    await fetchWithAuth(`/api/orders/${order.id}/fulfill`, {
+      method: 'PATCH'
     });
     onClose();
   };
 
   const handleFlag = async () => {
-    await fetch(`${API}/api/orders/${order.id}/flag`, {
+    await fetchWithAuth(`/api/orders/${order.id}/flag`, {
       method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${state.user?.token}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'FRAUD' })
     });
     onClose();
   };
 
   const handleUnflag = async () => {
-    await fetch(`${API}/api/orders/${order.id}/unflag`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${state.user?.token}` }
+    await fetchWithAuth(`/api/orders/${order.id}/unflag`, {
+      method: 'PATCH'
     });
     onClose();
   };
@@ -55,21 +50,17 @@ export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void 
 
   const handleVerify = async () => {
     if (order.status !== 'PENDING' && order.status !== 'REVIEW') return;
-    await fetch(`${API}/api/orders/${order.id}/verify`, {
+    await fetchWithAuth(`/api/orders/${order.id}/verify`, {
       method: 'POST',
-      headers: { 
-        'Authorization': `Bearer ${state.user?.token}`,
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
     onClose();
   };
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this order? This cannot be undone.')) return;
-    await fetch(`${API}/api/orders/${order.id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${state.user?.token}` }
+    await fetchWithAuth(`/api/orders/${order.id}`, {
+      method: 'DELETE'
     });
     onClose();
   };

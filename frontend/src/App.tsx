@@ -6,6 +6,9 @@ import { SessionDetail } from './pages/SessionDetail';
 import { Settings } from './pages/Settings';
 import { Dispatch } from './pages/Dispatch';
 import { Sessions } from './pages/Sessions';
+import { Billing } from './pages/Billing';
+import { PublicOrderPage } from './pages/PublicOrderPage';
+import { Network } from './pages/Network';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { fetchWithAuth, API } from './lib/api';
 
@@ -28,7 +31,7 @@ const AppRoutes: React.FC = () => {
     // Check for existing auth token in localStorage
     const token = localStorage.getItem('livesoko_token');
     if (token) {
-      fetchWithAuth('/api/settings')
+      fetchWithAuth('/api/auth/me')
         .then(res => {
           if (res.ok) return res.json();
           throw new Error('Invalid token');
@@ -36,11 +39,12 @@ const AppRoutes: React.FC = () => {
         .then(data => {
           dispatch({
             type: 'SET_USER',
-            payload: { ...data.seller, token } as any
+            payload: { ...data.user, token } as any
           });
         })
         .catch(() => {
           localStorage.removeItem('livesoko_token');
+          dispatch({ type: 'SET_USER', payload: null });
         })
         .finally(() => setLoading(false));
     } else {
@@ -51,36 +55,45 @@ const AppRoutes: React.FC = () => {
   if (loading) return <div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="w-8 h-8 rounded-full bg-brand-primary animate-ping"></div></div>;
 
   return (
-    <BrowserRouter>
       <div className="app-container max-w-md mx-auto relative min-h-screen bg-bg-base shadow-2xl pb-16">
         <Routes>
           <Route path="/" element={<Navigate to={state.user ? "/dashboard/live" : "/login"} replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard/live" element={<ProtectedRoute><LiveFeed /></ProtectedRoute>} />
-          <Route path="/dashboard/dispatch" element={<ProtectedRoute allowedRoles={['seller']}><Dispatch /></ProtectedRoute>} />
-          <Route path="/dashboard/session/:id" element={<ProtectedRoute allowedRoles={['seller']}><SessionDetail /></ProtectedRoute>} />
-          <Route path="/dashboard/sessions" element={<ProtectedRoute allowedRoles={['seller']}><Sessions /></ProtectedRoute>} />
-          <Route path="/dashboard/settings" element={<ProtectedRoute allowedRoles={['seller']}><Settings /></ProtectedRoute>} />
+          <Route path="/dashboard/dispatch" element={<ProtectedRoute><Dispatch /></ProtectedRoute>} />
+          <Route path="/dashboard/session/:id" element={<ProtectedRoute><SessionDetail /></ProtectedRoute>} />
+          <Route path="/dashboard/sessions" element={<ProtectedRoute requireManager><Sessions /></ProtectedRoute>} />
+          <Route path="/dashboard/settings" element={<ProtectedRoute requireManager><Settings /></ProtectedRoute>} />
+          <Route path="/dashboard/network" element={<ProtectedRoute requireManager><Network /></ProtectedRoute>} />
+          <Route path="/billing" element={<Billing />} />
+          <Route path="/@:slug" element={<PublicOrderPage />} />
         </Routes>
         <NavBar />
       </div>
-    </BrowserRouter>
   );
 };
 
-const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
+const ProtectedRoute = ({ children, requireManager }: { children: React.ReactNode, requireManager?: boolean }) => {
   const { state } = useAppContext();
   if (!state.user) return <Navigate to="/login" replace />;
-  if (allowedRoles && !allowedRoles.includes(state.user.role)) return <Navigate to="/dashboard/live" replace />;
+  if (!state.activeShop) return <Navigate to="/login" replace />;
+  
+  if (requireManager) {
+    const role = state.activeShop.role;
+    if (role !== 'owner' && role !== 'manager') {
+      return <Navigate to="/dashboard/live" replace />;
+    }
+  }
   return children as React.ReactElement;
 };
 
 const NavBar = () => {
   const { state } = useAppContext();
   const location = useLocation();
-  const navigate = useNavigate();
-  const role = state.user?.role;
-  if (location.pathname === '/login') return null;
+  if (location.pathname === '/login' || location.pathname.startsWith('/@')) return null;
+
+  const role = state.activeShop?.role;
+  const isManagerOrOwner = role === 'owner' || role === 'manager';
 
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-bg-surface border-t border-border-subtle flex justify-around items-center h-16 z-50 px-2 lg:shadow-[0_-5px_15px_rgba(0,0,0,0.3)]">
@@ -92,15 +105,16 @@ const NavBar = () => {
         <span className="text-[10px] font-display font-bold uppercase">Live</span>
       </NavLink>
 
-      {role === 'seller' && (
+      <NavLink
+        to="/dashboard/dispatch"
+        className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full transition-colors ${isActive ? 'text-blue-400' : 'text-text-muted hover:text-text-secondary'}`}
+      >
+        <span className="text-xl mb-1">🏍️</span>
+        <span className="text-[10px] font-display font-bold uppercase">Dispatch</span>
+      </NavLink>
+
+      {isManagerOrOwner && (
         <>
-          <NavLink
-            to="/dashboard/dispatch"
-            className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full transition-colors ${isActive ? 'text-blue-400' : 'text-text-muted hover:text-text-secondary'}`}
-          >
-            <span className="text-xl mb-1">🏍️</span>
-            <span className="text-[10px] font-display font-bold uppercase">Dispatch</span>
-          </NavLink>
           <NavLink
             to="/dashboard/sessions"
             className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full transition-colors ${isActive ? 'text-brand-primary' : 'text-text-muted hover:text-text-secondary'}`}
@@ -117,13 +131,28 @@ const NavBar = () => {
           </NavLink>
         </>
       )}
+
     </div>
   );
 };
 
+const AppRoutesWrapper = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const handleBillingError = () => {
+      navigate('/billing');
+    };
+    window.addEventListener('billing-error', handleBillingError);
+    return () => window.removeEventListener('billing-error', handleBillingError);
+  }, [navigate]);
+  return <AppRoutes />;
+};
+
 const App = () => (
   <AppProvider>
-    <AppRoutes />
+    <BrowserRouter>
+      <AppRoutesWrapper />
+    </BrowserRouter>
   </AppProvider>
 );
 

@@ -1,4 +1,4 @@
-# LiveSoko: Lessons Learned & SWE Feedback 🎓
+# LiveSoko: Lessons Learned - LiveSoko Enterprise Migration 🎓
 
 If I were your Lead Senior Software Engineer, these are the top lessons I'd want you to take away from the LiveSoko journey. We moved from "it works on my machine" to "it works for everyone, securely."
 

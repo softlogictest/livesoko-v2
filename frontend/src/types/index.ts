@@ -11,22 +11,31 @@ export interface OrderCardProps {
   payment_type: 'MPESA' | 'COD';
   mpesa_trace: string | null;
   created_at: string;
-  seller_id: string;
+  shop_id: string;
   session_id: string;
   mpesa_tx_code: string | null;
   status_reason: string | null;
   buyer_mpesa_name: string | null;
 }
 
+export interface Shop {
+  id: string;
+  name: string;
+  tier: 'trial' | 'shop' | 'suite';
+  status: 'active' | 'past_due' | 'suspended';
+  role: 'owner' | 'manager' | 'seller';
+}
+
 export interface AppState {
   user: {
     id: string;
     email: string;
-    role: 'seller' | 'handyman';
-    shop_name: string;
-    seller_id?: string;
+    role: 'owner' | 'manager' | 'seller' | 'admin';
+    enterprise_name?: string;
     token?: string;
+    shops: Shop[];
   } | null;
+  activeShop: Shop | null;
   activeSession: {
     id: string;
     title: string;

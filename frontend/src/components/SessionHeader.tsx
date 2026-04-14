@@ -51,8 +51,9 @@ export const SessionHeader: React.FC<{ onSessionEnded?: (sessionId: string) => v
     return () => clearInterval(interval);
   }, [activeSession?.id]);
 
-  const isHandyman = user?.role === 'handyman';
-  const displayOrders = isHandyman
+  const isManagerOrOwner = state.activeShop?.role === 'owner' || state.activeShop?.role === 'manager';
+  const isStaff = !isManagerOrOwner;
+  const displayOrders = isStaff
     ? state.orders.filter(o => o.status === 'VERIFIED')
     : state.orders;
 
@@ -63,25 +64,36 @@ export const SessionHeader: React.FC<{ onSessionEnded?: (sessionId: string) => v
           <div className="flex items-center gap-3">
             <h1 className="font-display font-bold text-brand-primary text-xl tracking-wide">LiveSoko</h1>
             {activeSession && (
-              <div className={`flex items-center gap-1.5 ${isHandyman ? 'bg-status-verified/20 text-status-verified' : 'bg-status-fraud/10 text-status-fraud'} px-2 py-0.5 rounded text-[10px] font-display font-bold uppercase tracking-widest`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${isHandyman ? 'bg-status-verified' : 'bg-status-fraud'} animate-pulse`}></div>
-                {isHandyman ? 'Fulfillment Ops' : 'Live'}
+              <div className={`flex items-center gap-1.5 ${isStaff ? 'bg-status-verified/20 text-status-verified' : 'bg-status-fraud/10 text-status-fraud'} px-2 py-0.5 rounded text-[10px] font-display font-bold uppercase tracking-widest`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${isStaff ? 'bg-status-verified' : 'bg-status-fraud'} animate-pulse`}></div>
+                {isStaff ? 'Fulfillment Ops' : 'Live'}
               </div>
             )}
           </div>
-          {user?.role === 'seller' && activeSession && (
+          <div className="flex items-center gap-2">
+            {isManagerOrOwner && activeSession && (
+              <button
+                onClick={() => setShowEndModal(true)}
+                className="px-3 py-1 text-xs font-display font-bold text-status-fraud border border-status-fraud rounded hover:bg-status-fraud hover:text-white transition-all active:scale-95"
+              >
+                END
+              </button>
+            )}
             <button
-              onClick={() => setShowEndModal(true)}
-              className="px-3 py-1 text-xs font-display font-bold text-status-fraud border border-status-fraud rounded hover:bg-status-fraud hover:text-white transition-all active:scale-95"
+              onClick={() => {
+                localStorage.removeItem('livesoko_token');
+                window.location.href = '/login';
+              }}
+              className="px-3 py-1 text-xs font-display font-bold text-text-muted border border-border-subtle rounded hover:border-text-muted transition-all active:scale-95 uppercase tracking-widest"
             >
-              END
+              Log Out
             </button>
-          )}
+          </div>
         </div>
 
         {activeSession && (
           <div className="font-body text-[10px] text-text-muted mt-2 uppercase tracking-wide">
-            {isHandyman ? (
+            {isStaff ? (
               <><span className="text-status-verified font-bold">{displayOrders.length} orders</span> to pack & dispatch</>
             ) : (
               <>

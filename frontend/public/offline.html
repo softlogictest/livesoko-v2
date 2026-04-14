@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiveSoko - Offline</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --text: #ffffff;
+      --accent: #E5E7EB;
+      --primary: #F0F0F0;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+    h1 {
+      margin: 0 0 10px 0;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    p {
+      color: var(--accent);
+      margin: 0 0 30px 0;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+    button {
+      background-color: var(--primary);
+      color: var(--bg);
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+    .footer-note {
+      position: absolute;
+      bottom: 30px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="icon">📡</div>
+  <h1>You're Offline</h1>
+  <p>Connection lost. Don't worry, background operations continue and orders will sync when you return.</p>
+  <button onclick="window.location.reload()">RETRY CONNECTION</button>
+  <div class="footer-note">LiveSoko • Any orders matching your form/SMS are safe.</div>
+  <script>
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>

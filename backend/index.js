@@ -7,6 +7,10 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 const { init: initDb } = require('./lib/database');
+const adminRouter = require('./routes/admin');
+const ordersRouter = require('./routes/orders');
+const paymentsRouter = require('./routes/payments');
+const sessionsRouter = require('./routes/sessions');
 
 // Initialize database FIRST (creates tables + default account)
 const db = initDb();
@@ -28,7 +32,7 @@ app.use(morgan('combined'));
 // Rate Limiting (Standard)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 2000, // Increased to 2000 to prevent local dev/HMR lockouts
   message: { error: 'Too many requests, please try again later.' }
 });
 
@@ -68,8 +72,8 @@ app.use('/api/sms/', smsLimiter);
 const domain = process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : '*';
 app.use(cors({
   origin: domain,
-  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-shop-id']
 }));
 
 app.use(express.json());
@@ -79,21 +83,24 @@ const { authenticate } = require('./middleware/auth');
 
 // Public routes (no auth required)
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/public', require('./routes/public'));
 app.use('/api/sms', require('./routes/sms')); // SMS webhook uses webhook_token, not auth
 app.use('/api/events', require('./routes/events').router); // SSE is open (browser handles auth)
 
-// Protected routes
-app.use('/api/orders', authenticate, require('./routes/orders'));
-app.use('/api/sessions', authenticate, require('./routes/sessions'));
-app.use('/api/settings', authenticate, require('./routes/settings'));
-
-// Also allow unauthenticated order creation via webhook_token
-const ordersRouter = require('./routes/orders');
+// Public Webhook for Order Intake (MUST precede general authenticated routes)
 app.post('/api/orders/webhook', (req, res, next) => {
   // Forward to orders route handler which checks for webhook_token
   req.user = null; // Explicitly no user
+  req.url = '/';   // Rewrite URL so ordersRouter.post('/') catches it
   ordersRouter.handle(req, res, next);
 });
+
+// Protected routes
+app.use('/api/orders', authenticate, ordersRouter);
+app.use('/api/payments', authenticate, paymentsRouter);
+app.use('/api/sessions', authenticate, sessionsRouter);
+app.use('/api/settings', authenticate, require('./routes/settings'));
+app.use('/api/admin', authenticate, adminRouter);
 
 // Serve React frontend
 // Railway build puts it in backend/public; local dev has it in frontend/dist

@@ -40,6 +40,13 @@
   --font-body:    'DM Mono', monospace;
 }
 
+/* Themes */
+.theme-acid-green { --brand-primary: #00FF88; --brand-dim: #00CC6A; }
+.theme-sweet-pink  { --brand-primary: #FF007A; --brand-dim: #D10064; }
+.theme-sky-blue    { --brand-primary: #00D1FF; --brand-dim: #00A3C7; }
+.theme-hot-lava    { --brand-primary: #FF4D00; --brand-dim: #D13F00; }
+.theme-royal-gold  { --brand-primary: #FFB800; --brand-dim: #CC9300; }
+
 body {
   background-color: var(--bg-base);
   color: var(--text-primary);

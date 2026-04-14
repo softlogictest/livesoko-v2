@@ -43,3 +43,18 @@ Every engineering decision involves trade-offs. Here is why we chose certain pat
   - **Pro**: Simple, stateless on the client. Works seamlessly with SSE and mobile PWA.
   - **Con**: Vulnerable to XSS if inputs aren't sanitized (which we mitigate with express-validator and helmet).
   - **Why?**: Cookie-based sessions add CSRF complexity. Since LiveSoko is a PWA, localStorage tokens with 7-day auto-renewal provide a smoother mobile experience.
+
+## 7. Global vs. Contextual Database Scoping (SaaS Migration)
+- **Decision**: Separated `profiles` from `shops` to allow 1-to-N multi-shop ownership.
+- **Trade-off**:
+  - **Pro**: Massive scalability for enterprise clients. A single 'Owner' can effortlessly toggle between multiple shops securely.
+  - **Con**: Added complexity to the backend API layer. All requests must now pass an active `x-shop-id` context header to ensure operations don't bleed across stores.
+  - **Why?**: Essential for the Enterprise scaling phase.
+
+## 8. Explicit Route Masking Avoidance
+- **Lesson Learned (SaaS Phase)**: When combining public webhooks with protected global routes, Express reads middleware top-down. We learned the hard way that mounting `app.use('/api/orders')` before `app.post('/api/orders/webhook')` instantly masks the webhook with an HTTP 401. 
+- **Production Paradigm**: Always mount explicit public unauthenticated webhooks *above* blanket authentication guard routes in the index architecture.
+
+## 9. Strict CORS Security Headers
+- **Lesson Learned (SaaS Phase)**: Moving to multi-tenant required moving the `x-shop-id` securely from the React frontend to the backend via a custom header. 
+- **Production Paradigm**: The browser will silently KILL all HTTP requests via invisible CORS preflights (HTTP 204) if custom security headers are introduced to the stack but forgotten in the backend `cors({ allowedHeaders: [...] })` config. Always whitelist headers!

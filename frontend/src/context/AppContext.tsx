@@ -1,33 +1,53 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { AppState, OrderCardProps } from '../types';
+import { AppState, OrderCardProps, Shop } from '../types';
 
 type Action =
   | { type: 'SET_USER'; payload: AppState['user'] }
+  | { type: 'SET_ACTIVE_SHOP'; payload: Shop }
   | { type: 'SET_ACTIVE_SESSION'; payload: AppState['activeSession'] }
   | { type: 'SET_ORDERS'; payload: OrderCardProps[] }
   | { type: 'ADD_ORDER'; payload: OrderCardProps }
   | { type: 'UPDATE_ORDER'; payload: OrderCardProps }
   | { type: 'DELETE_ORDER'; payload: { id: string } }
   | { type: 'SET_TOAST'; payload: { message: string; type: 'success' | 'error' | 'info' } | null }
+  | { type: 'SET_UNMATCHED_PAYMENTS'; payload: any[] }
+  | { type: 'ADD_UNMATCHED_PAYMENT'; payload: any }
+  | { type: 'REMOVE_UNMATCHED_PAYMENT'; payload: string }
   | { type: 'SET_INSTALL_PROMPT'; payload: any };
 
 const initialState: AppState = {
   user: null,
+  activeShop: null,
   activeSession: null,
   orders: [],
+  unmatchedPayments: [],
   toast: null,
   installPrompt: null,
 };
 
 function appReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
-    case 'SET_USER':
+    case 'SET_USER': {
+      // Auto-select first shop if available
+      const firstShop = action.payload?.shops?.[0] || null;
+      if (firstShop) localStorage.setItem('livesoko_shop_id', firstShop.id);
       return { 
         ...state, 
         user: action.payload,
+        activeShop: firstShop,
         activeSession: null,
         orders: []
       };
+    }
+    case 'SET_ACTIVE_SHOP': {
+      if (action.payload) localStorage.setItem('livesoko_shop_id', action.payload.id);
+      return {
+        ...state,
+        activeShop: action.payload,
+        activeSession: null,
+        orders: []
+      };
+    }
     case 'SET_ACTIVE_SESSION':
       return { ...state, activeSession: action.payload };
     case 'SET_ORDERS':
@@ -47,6 +67,12 @@ function appReducer(state: AppState, action: Action): AppState {
       };
     case 'SET_TOAST':
       return { ...state, toast: action.payload };
+    case 'SET_UNMATCHED_PAYMENTS':
+      return { ...state, unmatchedPayments: action.payload };
+    case 'ADD_UNMATCHED_PAYMENT':
+      return { ...state, unmatchedPayments: [action.payload, ...state.unmatchedPayments] };
+    case 'REMOVE_UNMATCHED_PAYMENT':
+      return { ...state, unmatchedPayments: state.unmatchedPayments.filter(p => p.id !== action.payload) };
     case 'SET_INSTALL_PROMPT':
       return { ...state, installPrompt: action.payload };
     default:

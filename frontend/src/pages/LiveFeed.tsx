@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { SessionHeader } from '../components/SessionHeader';
 import { LiveTicker } from '../components/LiveTicker';
 import { ManualOrderModal } from '../components/ManualOrderModal';
+import { UnmatchedPaymentsModal } from '../components/UnmatchedPaymentsModal';
 import { SessionSummary } from '../components/SessionSummary';
 import { useRealtime } from '../hooks/useRealtime';
 import { useAppContext } from '../context/AppContext';
@@ -13,7 +14,10 @@ export const LiveFeed: React.FC = () => {
   const [showManualModal, setShowManualModal] = useState(false);
   const [staleCount, setStaleCount] = useState(0);
   const [dismissedStale, setDismissedStale] = useState(false);
+  const [showUnmatchedModal, setShowUnmatchedModal] = useState(false);
   const [endedSessionId, setEndedSessionId] = useState<string | null>(null);
+
+  const isManagerOrOwner = state.activeShop?.role === 'owner' || state.activeShop?.role === 'manager' || state.user?.role === 'admin';
 
   useRealtime();
 
@@ -42,6 +46,13 @@ export const LiveFeed: React.FC = () => {
           } else {
             dispatch({ type: 'SET_ACTIVE_SESSION', payload: null });
             dispatch({ type: 'SET_ORDERS', payload: [] });
+          }
+
+          // Always fetch unmatched payments on load
+          const resPayments = await fetchWithAuth('/api/payments/unmatched');
+          if (resPayments.ok) {
+            const payments = await resPayments.json();
+            dispatch({ type: 'SET_UNMATCHED_PAYMENTS', payload: payments });
           }
         }
       } catch (e) {
@@ -160,6 +171,35 @@ export const LiveFeed: React.FC = () => {
     <div className="min-h-screen bg-bg-base flex flex-col">
       <SessionHeader onSessionEnded={(id) => setEndedSessionId(id)} />
 
+      {/* Floating Unmatched Payments Alert */}
+      {state.unmatchedPayments.length > 0 && (
+        <div 
+          onClick={() => setShowUnmatchedModal(true)}
+          className="mx-4 mt-3 flex items-center justify-between bg-brand-primary/10 border border-brand-primary/40 rounded-xl px-4 py-3 cursor-pointer shadow-[0_0_20px_rgba(0,255,136,0.15)] animate-in fade-in slide-in-from-top-2 duration-500 hover:bg-brand-primary/20 transition-all relative group overflow-hidden"
+        >
+          {/* Pulsing Glow Background */}
+          <div className="absolute inset-0 bg-brand-primary/5 animate-pulse"></div>
+          
+          <div className="flex items-center gap-3 relative z-10">
+             <div className="w-10 h-10 rounded-full bg-brand-primary/20 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(0,255,136,0.3)] group-hover:scale-110 transition-transform">
+               💰
+             </div>
+             <div>
+                <p className="text-brand-primary text-[10px] font-display font-bold uppercase tracking-widest leading-none mb-1">
+                  System Alert
+                </p>
+                <p className="text-white text-sm font-display font-bold">
+                  {state.unmatchedPayments.length} Floating Payment{state.unmatchedPayments.length > 1 ? 's' : ''}
+                </p>
+                <p className="text-text-muted text-[10px] font-body uppercase tracking-tight mt-0.5">Claim funds & link to order</p>
+             </div>
+          </div>
+          <div className="relative z-10 bg-brand-primary text-black w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg group-hover:translate-x-1 transition-transform">
+            →
+          </div>
+        </div>
+      )}
+
       {/* Staleness alert */}
       {staleCount > 0 && !dismissedStale && (
         <div className="mx-4 mt-3 flex items-start gap-3 bg-status-review/10 border border-status-review/40 rounded-lg px-4 py-3">
@@ -176,7 +216,7 @@ export const LiveFeed: React.FC = () => {
         </div>
       )}
       
-      {!state.activeSession && state.user?.role === 'seller' && (
+      {!state.activeSession && isManagerOrOwner && (
         <div className="p-4 mt-6">
           <button 
             onClick={handleStartSession}
@@ -204,6 +244,12 @@ export const LiveFeed: React.FC = () => {
         <ManualOrderModal 
           onClose={() => setShowManualModal(false)}
           onSubmit={handleManualOrder}
+        />
+      )}
+
+      {showUnmatchedModal && (
+        <UnmatchedPaymentsModal 
+          onClose={() => setShowUnmatchedModal(false)}
         />
       )}
     </div>

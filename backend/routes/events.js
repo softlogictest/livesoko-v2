@@ -1,6 +1,10 @@
 // Server-Sent Events (SSE) manager
 // Replaces Supabase Realtime WebSocket
 
+const { getDb } = require('../lib/database');
+const express = require('express');
+const router = express.Router();
+
 const clients = new Map(); // Map<shopId, Set<res>>
 
 function addClient(shopId, res) {
@@ -28,7 +32,7 @@ function addClient(shopId, res) {
 }
 
 function broadcast(event, data) {
-  const shopId = data.seller_id;
+  const shopId = data.shop_id || data.seller_id; // Added fallback to support any old data objects momentarily
   if (!shopId) return;
 
   const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
@@ -41,25 +45,23 @@ function broadcast(event, data) {
   }
 }
 
-// Express route handler
-const express = require('express');
-const router = express.Router();
-
+// GET /api/events?token=XYZ&shop_id=ABC
 router.get('/', (req, res) => {
-  const { token } = req.query;
-  if (!token) return res.status(401).end();
+  const { token, shop_id } = req.query;
+  if (!token || !shop_id) return res.status(401).end();
 
   const db = getDb();
-  const row = db.prepare(`
-    SELECT p.id, p.role, p.seller_id FROM auth_tokens t
-    JOIN profiles p ON t.user_id = p.id
-    WHERE t.token = ?
-  `).get(token);
+  
+  // Verify token maps to user, and user is mapped to that shop
+  const hasAccess = db.prepare(`
+    SELECT t.user_id FROM auth_tokens t
+    JOIN shop_users su ON t.user_id = su.user_id
+    WHERE t.token = ? AND su.shop_id = ?
+  `).get(token, shop_id);
 
-  if (!row) return res.status(401).end();
+  if (!hasAccess) return res.status(401).end();
 
-  const shopId = row.role === 'seller' ? row.id : row.seller_id;
-  addClient(shopId, res);
+  addClient(shop_id, res);
 });
 
 module.exports = { router, broadcast };

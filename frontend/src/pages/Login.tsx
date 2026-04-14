@@ -39,16 +39,16 @@ export const Login: React.FC = () => {
         return;
       }
 
-      // Check if password change is required
-      if (data.user.must_change_password) {
-        setAuthToken(data.token);
-        setMustChangePassword(true);
-        setLoading(false);
-        return;
-      }
-
       // Login successful
       localStorage.setItem('livesoko_token', data.token);
+      
+      // Auto-select first shop if available
+      const primaryShop = data.user.shops?.[0];
+      if (primaryShop) {
+        localStorage.setItem('livesoko_shop_id', primaryShop.id);
+        dispatch({ type: 'SET_ACTIVE_SHOP', payload: primaryShop });
+      }
+
       dispatch({ type: 'SET_USER', payload: { ...data.user, token: data.token } as any });
       navigate('/dashboard/live');
     } catch (err: any) {
@@ -83,6 +83,13 @@ export const Login: React.FC = () => {
       }
 
       localStorage.setItem('livesoko_token', data.token);
+      
+      const primaryShop = data.user.shops?.[0];
+      if (primaryShop) {
+        localStorage.setItem('livesoko_shop_id', primaryShop.id);
+        dispatch({ type: 'SET_ACTIVE_SHOP', payload: primaryShop });
+      }
+
       dispatch({ type: 'SET_USER', payload: { ...data.user, token: data.token } as any });
       notify('Welcome to LiveSoko!', 'success');
       navigate('/dashboard/live');
@@ -135,52 +142,6 @@ export const Login: React.FC = () => {
     }
   };
 
-  // Force password change screen
-  if (mustChangePassword) {
-    return (
-      <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center p-6 pb-32">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-8 text-brand-primary">
-            <h1 className="font-display font-bold text-4xl tracking-wider mb-2">🔐</h1>
-            <p className="font-display font-bold text-xl">Change Your Password</p>
-            <p className="font-body text-text-secondary text-sm mt-2">Before you start, set a secure password for your shop.</p>
-          </div>
-
-          <form onSubmit={handleChangePassword} className="flex flex-col gap-4">
-            {error && <div className="bg-status-fraud/10 text-status-fraud p-3 rounded font-body text-sm border border-status-fraud text-center">{error}</div>}
-
-            <input
-              type="password"
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              placeholder="New Password"
-              className="bg-bg-input border border-border-subtle rounded p-4 text-text-primary font-body focus:outline-none focus:border-brand-primary transition-colors"
-              required
-              minLength={6}
-            />
-
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              placeholder="Confirm Password"
-              className="bg-bg-input border border-border-subtle rounded p-4 text-text-primary font-body focus:outline-none focus:border-brand-primary transition-colors"
-              required
-              minLength={6}
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-4 bg-brand-primary text-black font-display font-bold text-xl py-4 rounded transition-transform active:scale-[0.98] disabled:opacity-50 tracking-wide"
-            >
-              {loading ? 'SAVING...' : 'SET PASSWORD & ENTER'}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-bg-base flex flex-col items-center justify-center p-6 pb-32">

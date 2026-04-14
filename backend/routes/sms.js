@@ -6,14 +6,34 @@ const { broadcast } = require('./events');
 const { parseSms } = require('../utils/smsParser');
 
 // Safe sms_logs insert — never crashes the route if audit log fails
-function logSms(db, id, sellerId, rawBody, senderNumber, matchStatus, matchedOrderId = null) {
+function logSms(db, id, shopId, rawBody, senderNumber, matchStatus, matchedOrderId = null) {
   try {
     db.prepare(`
-      INSERT INTO sms_logs (id, seller_id, raw_body, sender_number, matched_order_id, match_status)
+      INSERT INTO sms_logs (id, shop_id, raw_body, sender_number, matched_order_id, match_status)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, sellerId, rawBody || '', senderNumber || null, matchedOrderId, matchStatus);
+    `).run(id, shopId, rawBody || '', senderNumber || null, matchedOrderId, matchStatus);
   } catch (e) {
     console.warn('[SMS LOG WARN] Could not write to sms_logs:', e.message);
+  }
+}
+
+function upsertDevice(db, shopId, senderNumber) {
+  try {
+    const existing = db.prepare('SELECT id FROM devices WHERE shop_id = ? AND sender_number = ?').get(shopId, senderNumber);
+    const now = new Date().toISOString();
+    
+    if (existing) {
+      db.prepare('UPDATE devices SET last_seen_at = ? WHERE id = ?').run(now, existing.id);
+    } else {
+      db.prepare('INSERT INTO devices (shop_id, sender_number, last_seen_at) VALUES (?, ?, ?)')
+        .run(shopId, senderNumber, now);
+    }
+    
+    // Notify frontend that a device is active
+    const device = db.prepare('SELECT * FROM devices WHERE shop_id = ? AND sender_number = ?').get(shopId, senderNumber);
+    broadcast('device:active', device);
+  } catch (e) {
+    console.warn('[DEVICE UPSERT WARN]', e.message);
   }
 }
 
@@ -25,17 +45,20 @@ router.post('/:webhook_token', (req, res) => {
     const { message, sender_number } = req.body;
 
     // Step 1: Find seller by webhook token
-    const seller = db.prepare('SELECT * FROM profiles WHERE webhook_token = ?').get(webhook_token);
+    const seller = db.prepare('SELECT * FROM shops WHERE webhook_token = ?').get(webhook_token);
     if (!seller) return res.status(404).json({ error: 'Invalid webhook token' });
 
-    const sellerId = seller.id;
+    const shopId = seller.id;
     const logId = crypto.randomUUID();
+
+    // Register/update device
+    if (sender_number) upsertDevice(db, shopId, sender_number);
 
     // Step 2: Parse the SMS
     const parseResult = parseSms(message);
 
     if (!parseResult || !parseResult.success) {
-      logSms(db, logId, sellerId, message, sender_number, 'PARSE_ERROR');
+      logSms(db, logId, shopId, message, sender_number, 'PARSE_ERROR');
       return res.status(200).json({ match_status: 'PARSE_ERROR', message: 'Could not parse SMS' });
     }
 
@@ -44,14 +67,14 @@ router.post('/:webhook_token', (req, res) => {
     // Step 3: Check for duplicate TX code
     const existing = db.prepare('SELECT id FROM orders WHERE mpesa_tx_code = ?').get(parsed.txCode);
     if (existing) {
-      logSms(db, logId, sellerId, message, sender_number, 'DUPLICATE', existing.id);
+      logSms(db, logId, shopId, message, sender_number, 'DUPLICATE', existing.id);
       return res.status(200).json({ match_status: 'DUPLICATE', message: 'Transaction code already used' });
     }
 
     // Step 4: Find active session
-    const session = db.prepare('SELECT * FROM sessions WHERE seller_id = ? AND status = ?').get(sellerId, 'active');
+    const session = db.prepare('SELECT * FROM sessions WHERE shop_id = ? AND status = ?').get(shopId, 'active');
     if (!session) {
-      logSms(db, logId, sellerId, message, sender_number, 'UNMATCHED');
+      logSms(db, logId, shopId, message, sender_number, 'UNMATCHED');
       return res.status(200).json({ match_status: 'UNMATCHED', message: 'No active session' });
     }
 
@@ -59,13 +82,21 @@ router.post('/:webhook_token', (req, res) => {
     const amount = parsed.amount;
     const matchingOrders = db.prepare(`
       SELECT * FROM orders 
-      WHERE session_id = ? AND seller_id = ? AND status = 'PENDING'
+      WHERE session_id = ? AND shop_id = ? AND status = 'PENDING'
         AND expected_amount BETWEEN ? AND ?
       ORDER BY ABS(expected_amount - ?) ASC, created_at DESC
-    `).all(session.id, sellerId, amount - 50, amount + 50, amount);
+    `).all(session.id, shopId, amount - 50, amount + 50, amount);
 
     if (matchingOrders.length === 0) {
-      logSms(db, logId, sellerId, message, sender_number, 'UNMATCHED');
+      db.prepare(`
+        INSERT INTO unmatched_payments (shop_id, mpesa_code, mpesa_amount, mpesa_sender, raw_sms)
+        VALUES (?, ?, ?, ?, ?)
+      `).run(shopId, parsed.txCode, parsed.amount, parsed.senderName, message);
+
+      const unmatched = db.prepare('SELECT * FROM unmatched_payments WHERE mpesa_code = ?').get(parsed.txCode);
+      broadcast('payment:unmatched', unmatched);
+      
+      logSms(db, logId, shopId, message, sender_number, 'UNMATCHED');
       return res.status(200).json({ match_status: 'UNMATCHED', message: `No pending order for Ksh ${amount}` });
     }
 
@@ -122,7 +153,7 @@ router.post('/:webhook_token', (req, res) => {
     broadcast('order:updated', updatedOrder);
 
     // Step 10: Log (non-fatal)
-    logSms(db, logId, sellerId, message, sender_number, 'MATCHED', bestMatch.id);
+    logSms(db, logId, shopId, message, sender_number, 'MATCHED', bestMatch.id);
 
     return res.status(200).json({
       match_status: 'MATCHED',

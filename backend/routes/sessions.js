@@ -17,20 +17,20 @@ router.post('/', [
   const { title } = req.body;
 
   // Check for existing active session
-  const active = db.prepare('SELECT * FROM sessions WHERE seller_id = ? AND status = ?').get(shopId, 'active');
+  const active = db.prepare('SELECT * FROM sessions WHERE shop_id = ? AND status = ?').get(shopId, 'active');
   if (active) return res.status(400).json({ error: 'You already have an active session. End it first.' });
 
   const id = crypto.randomUUID();
   db.prepare(`
-    INSERT INTO sessions (id, seller_id, title, status) VALUES (?, ?, ?, 'active')
+    INSERT INTO sessions (id, shop_id, title, status) VALUES (?, ?, ?, 'active')
   `).run(id, shopId, title || null);
 
   const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(id);
 
   // Start Google Sheet polling if URL is configured
-  const seller = db.prepare('SELECT sheet_url FROM profiles WHERE id = ?').get(shopId);
-  if (seller?.sheet_url) {
-    startPolling(seller.sheet_url, shopId, id);
+  const shop = db.prepare('SELECT sheet_url FROM shops WHERE id = ?').get(shopId);
+  if (shop?.sheet_url) {
+    startPolling(shop.sheet_url, shopId, id);
   }
 
   res.status(201).json(session);
@@ -41,7 +41,7 @@ router.patch('/:id/end', (req, res) => {
   const db = getDb();
 
   db.prepare(`
-    UPDATE sessions SET status = 'ended', ended_at = datetime(?) WHERE id = ? AND seller_id = ?
+    UPDATE sessions SET status = 'ended', ended_at = datetime(?) WHERE id = ? AND shop_id = ?
   `).run(new Date().toISOString(), req.params.id, req.user.shop_id);
 
   stopPolling();
@@ -63,7 +63,7 @@ router.get('/', (req, res) => {
       SUM(CASE WHEN o.status IN ('VERIFIED', 'FULFILLED', 'COD_PENDING') THEN o.expected_amount ELSE 0 END) as confirmed_revenue
     FROM sessions s
     LEFT JOIN orders o ON s.id = o.session_id
-    WHERE s.seller_id = ?
+    WHERE s.shop_id = ?
     GROUP BY s.id
     ORDER BY s.created_at DESC
   `).all(shopId);
@@ -74,12 +74,12 @@ router.get('/', (req, res) => {
 // GET /api/sessions/:id/summary — session analytics
 router.get('/:id/summary', (req, res) => {
   const db = getDb();
-  const session = db.prepare('SELECT * FROM sessions WHERE id = ? AND seller_id = ?')
+  const session = db.prepare('SELECT * FROM sessions WHERE id = ? AND shop_id = ?')
     .get(req.params.id, req.user.shop_id);
     
   if (!session) return res.status(404).json({ error: 'Session not found or unauthorized' });
 
-  const orders = db.prepare('SELECT * FROM orders WHERE session_id = ? AND seller_id = ?').all(req.params.id, req.user.shop_id);
+  const orders = db.prepare('SELECT * FROM orders WHERE session_id = ? AND shop_id = ?').all(req.params.id, req.user.shop_id);
 
   const total_orders = orders.length;
   const verified = orders.filter(o => o.status === 'VERIFIED').length;
