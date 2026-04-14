@@ -3,8 +3,8 @@
   "version": "2.2.0",
   "description": "LiveSoko — Local-first live commerce for social sellers",
   "scripts": {
-    "build": "cd frontend && rm -f package-lock.json && npm install && npm run build && cp -r dist ../backend/public",
-    "start": "cd backend && npm install && node index.js",
+    "build": "cd backend && npm install && cd ../frontend && npm install && npm run build && rm -rf ../backend/public && cp -r dist ../backend/public",
+    "start": "cd backend && node index.js",
     "dev:backend": "cd backend && node index.js",
     "dev:frontend": "cd frontend && npm run dev"
   },
