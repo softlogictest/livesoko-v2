@@ -43,11 +43,12 @@ const loginLimiter = rateLimit({
   message: { error: 'Too many login attempts. Please wait 15 minutes.' }
 });
 
-const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 100, // Relaxed for developer testing
-  message: { error: 'Too many accounts created. Please wait 1 hour.' }
-});
+// Registration rate limiter disabled during development/testing
+// const registerLimiter = rateLimit({
+//   windowMs: 60 * 60 * 1000,
+//   max: 100,
+//   message: { error: 'Too many accounts created. Please wait 1 hour.' }
+// });
 
 // Security Pillar 5: Webhook & SMS Throttling (Protect DB from floods)
 const webhookLimiter = rateLimit({
@@ -64,7 +65,7 @@ const smsLimiter = rateLimit({
 
 app.use('/api/', limiter);
 app.use('/api/auth/login', loginLimiter);
-app.use('/api/auth/register', registerLimiter);
+// app.use('/api/auth/register', registerLimiter); // Disabled during testing
 app.use('/api/orders/webhook', webhookLimiter);
 app.use('/api/sms/', smsLimiter);
 
