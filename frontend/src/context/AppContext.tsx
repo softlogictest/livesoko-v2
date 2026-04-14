@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { AppState, OrderCardProps, Shop } from '../types';
+import { AppState, OrderCardProps, Shop, UnmatchedPayment } from '../types';
 
 type Action =
   | { type: 'SET_USER'; payload: AppState['user'] }
@@ -10,8 +10,8 @@ type Action =
   | { type: 'UPDATE_ORDER'; payload: OrderCardProps }
   | { type: 'DELETE_ORDER'; payload: { id: string } }
   | { type: 'SET_TOAST'; payload: { message: string; type: 'success' | 'error' | 'info' } | null }
-  | { type: 'SET_UNMATCHED_PAYMENTS'; payload: any[] }
-  | { type: 'ADD_UNMATCHED_PAYMENT'; payload: any }
+  | { type: 'SET_UNMATCHED_PAYMENTS'; payload: UnmatchedPayment[] }
+  | { type: 'ADD_UNMATCHED_PAYMENT'; payload: UnmatchedPayment }
   | { type: 'REMOVE_UNMATCHED_PAYMENT'; payload: string }
   | { type: 'SET_INSTALL_PROMPT'; payload: any };
 

@@ -26,6 +26,17 @@ export interface Shop {
   role: 'owner' | 'manager' | 'seller';
 }
 
+export interface UnmatchedPayment {
+  id: string;
+  shop_id: string;
+  mpesa_code: string;
+  mpesa_amount: number;
+  mpesa_sender: string | null;
+  raw_sms: string;
+  status: 'pending' | 'matched' | 'ignored';
+  received_at: string;
+}
+
 export interface AppState {
   user: {
     id: string;
@@ -45,6 +56,7 @@ export interface AppState {
     verified_revenue: number;
   } | null;
   orders: OrderCardProps[];
+  unmatchedPayments: UnmatchedPayment[];
   toast: { message: string; type: 'success' | 'error' | 'info' } | null;
   installPrompt: any;
 }
