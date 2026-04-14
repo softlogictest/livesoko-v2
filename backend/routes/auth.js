@@ -91,9 +91,10 @@ router.post('/register', [
 
     res.json({ message: 'Account created', token, user: { ...user, shops } });
   } catch (err) {
-    console.error(err);
+    console.error('[REGISTRATION ERROR]', err);
     if (db.inTransaction) db.exec('ROLLBACK');
-    res.status(500).json({ error: 'Failed to create account' });
+    // Return specific error message to help debug during this phase
+    res.status(500).json({ error: `Registration Failed: ${err.message}` });
   }
 });
 

@@ -45,7 +45,7 @@ const loginLimiter = rateLimit({
 
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 3,
+  max: 100, // Relaxed for developer testing
   message: { error: 'Too many accounts created. Please wait 1 hour.' }
 });
 
