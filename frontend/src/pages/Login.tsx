@@ -72,7 +72,7 @@ export const Login: React.FC = () => {
       const res = await fetch(`${API}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, shop_name: shopName })
+        body: JSON.stringify({ email, password, enterprise_name: shopName })
       });
 
       const data = await res.json();
