@@ -1,6 +1,6 @@
-# VibeSoko: AI Prompting Guide 🤖
+# LiveSoko: AI Prompting Guide 🤖
 
-Working with an AI coding assistant (like me) on VibeSoko is most efficient when you provide **Context + Constraint**. Here’s the best way to prompt for future features.
+Working with an AI coding assistant on LiveSoko is most efficient when you provide **Context + Constraint**. Here's the best way to prompt for future features.
 
 ## 1. The "One Dimension" Rule 🎯
 - **Avoid**: "Build a whole new delivery feature with riders and payments."
@@ -10,10 +10,10 @@ Working with an AI coding assistant (like me) on VibeSoko is most efficient when
 ## 2. Leverage Existing Patterns 🧩
 - **Pro-Tip**: Reference our existing "hardened" files.
 - **Prompt**: "Add a new endpoint for `DELETE /api/sessions/:id`. Use the same authentication middleware and `shop_id` scoping logic found in `backend/routes/settings.js`."
-- **Why**: This ensures new code matches the security and style of the existing "Senior Engineer" approved codebase.
+- **Why**: This ensures new code matches the security and style of the existing codebase.
 
 ## 3. Describe the "User Vibe" 🎨
-- **Prompt**: "Update the 'Order Received' toast to feel more premium. Use a deep red and green gradient, add a subtle pop animation, and make it compatible with our existing VibeSoko branding."
+- **Prompt**: "Update the 'Order Received' toast to feel more premium. Use a deep red and green gradient, add a subtle pop animation, and make it compatible with our existing LiveSoko branding."
 - **Why**: AI is great at CSS, but it needs to know what "premium" means to *you*. Always specify colors and "feel."
 
 ## 4. The "Security First" Constraint 🔐

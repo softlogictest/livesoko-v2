@@ -50,11 +50,24 @@ router.patch('/:id/end', (req, res) => {
   res.json(session);
 });
 
-// GET /api/sessions — list sessions
+// GET /api/sessions — list sessions (Live History)
 router.get('/', (req, res) => {
   const db = getDb();
   const shopId = req.user.shop_id;
-  const sessions = db.prepare('SELECT * FROM sessions WHERE seller_id = ? ORDER BY created_at DESC').all(shopId);
+  
+  // Aggregate stats per session via JOIN
+  const sessions = db.prepare(`
+    SELECT 
+      s.*, 
+      COUNT(o.id) as order_count, 
+      SUM(CASE WHEN o.status IN ('VERIFIED', 'FULFILLED', 'COD_PENDING') THEN o.expected_amount ELSE 0 END) as confirmed_revenue
+    FROM sessions s
+    LEFT JOIN orders o ON s.id = o.session_id
+    WHERE s.seller_id = ?
+    GROUP BY s.id
+    ORDER BY s.created_at DESC
+  `).all(shopId);
+
   res.json(sessions);
 });
 

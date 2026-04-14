@@ -1,10 +1,10 @@
-# VibeSoko — Railway Deployment Guide
+# LiveSoko — Railway Deployment Guide
 
-This guide takes the VibeSoko code on your PC and puts it on the internet so you can use it entirely from your phone.
+This guide takes the LiveSoko code on your PC and puts it on the internet so you can use it entirely from your phone.
 
 ## Step 1: Create a GitHub Repository
 1. Go to [github.com/new](https://github.com/new)
-2. Name it `vibesoko`
+2. Name it `livesoko`
 3. Leave it **Public** or **Private** (either works)
 4. Click **Create repository**
 
@@ -15,7 +15,7 @@ This guide takes the VibeSoko code on your PC and puts it on the internet so you
 
 ```powershell
 # Fix the link with your token
-git remote set-url origin https://SoftLOGICtech:YOUR_TOKEN_HERE@github.com/SoftLOGICtech/vibesoko.git
+git remote set-url origin https://SoftLOGICtech:YOUR_TOKEN_HERE@github.com/SoftLOGICtech/livesoko.git
 git push -u origin main
 ```
 
@@ -26,7 +26,7 @@ git push -u origin main
 ## Step 3: Deploy to Railway
 1. Go to [railway.app](https://railway.app) and log in with GitHub
 2. Click **+ New Project** → **Deploy from GitHub repo**
-3. Select your `vibesoko` repo
+3. Select your `livesoko` repo
 5. Go to the **Variables** tab → click **+ New Variable**.
    - **If PORT is not suggested**: Go to the **Settings** tab first, click **Generate Domain**, then go back to Variables. Now `PORT` should appear in the suggestions!
    - **Copy-paste friendly**: If you can't copy "production", just type it manually: `p` `r` `o` `d` `u` `c` `t` `i` `o` `n`.
@@ -35,13 +35,13 @@ git push -u origin main
 
 1. In your Railway project, click **+ New** → **Volume**.
 2. **Select your Backend service** in the dropdown.
-3. Name it `vibesoko-data`.
+3. Name it `livesoko-data`.
 4. Set **Mount Path** to `/data`.
 5. Click **Save**.
 
 ### Step 5: Final Variables
 Ensure these are set in your **Backend** service:
-- `DB_PATH` = `/data/vibesoko.db`
+- `DB_PATH` = `/data/livesoko.db`
 - `NODE_ENV` = `production`
 - `PORT` = `3000`
 
@@ -50,7 +50,7 @@ Ensure these are set in your **Backend** service:
 ## Step 5: Get your URL
 1. Click the **Settings** tab in your Railway service
 2. Click **Generate Domain**
-3. You now have a link like `https://vibesoko-production.up.railway.app`
+3. You now have a link like `https://livesoko-production.up.railway.app`
 4. Open this on your phone!
 
 ---

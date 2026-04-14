@@ -1,6 +1,6 @@
-# VibeSoko: Edge Cases & Resilience 🛡️
+# LiveSoko: Edge Cases & Resilience 🛡️
 
-VibeSoko is built to handle the "chaos" of a live selling session. Here is how we handle critical edge cases.
+LiveSoko is built to handle the "chaos" of a live selling session. Here is how we handle critical edge cases.
 
 ## 1. Duplicate MPESA Codes 📋
 - **Case**: A user tries to submit an order with a transaction code that was already used.
@@ -16,7 +16,7 @@ VibeSoko is built to handle the "chaos" of a live selling session. Here is how w
 
 ## 4. Rapid PWA Installation 📱
 - **Case**: User installs, uninstalls, and reinstalls the app quickly.
-- **Fix**: Our `sw.js` (Service Worker) uses a versioned cache (`vibesoko-pwa-v1`). When we update the app, we increment the version to force a clean cache wipe, preventing "stuck" UI versions.
+- **Fix**: Our `sw.js` (Service Worker) uses a versioned cache (`livesoko-pwa-v1`). When we update the app, we increment the version to force a clean cache wipe, preventing "stuck" UI versions.
 
 ## 5. Non-Standard Phone Numbers 📞
 - **Case**: Users entering numbers with spaces, dashes, or missing country codes.
@@ -25,3 +25,11 @@ VibeSoko is built to handle the "chaos" of a live selling session. Here is how w
 ## 6. Large Data Volumes (Cleanup) 🧹
 - **Case**: Seller has 10,000+ orders after months of use.
 - **Fix**: We've added indexes on `seller_id`, `created_at`, and `status`. This keeps lookups sub-millisecond even as the database grows into the tens of megabytes.
+
+## 7. Expired Session Tokens 🔑
+- **Case**: A user opens the app after a week of inactivity and their token has expired.
+- **Fix**: The backend runs `DELETE FROM auth_tokens WHERE expires_at < datetime('now')` on every startup, cleaning stale sessions. The frontend detects `401` responses and redirects to the login page automatically.
+
+## 8. First Boot (Empty Database) 🆕
+- **Case**: Deploying LiveSoko for the very first time with no existing data.
+- **Fix**: The `database.js` init function checks `SELECT id FROM profiles LIMIT 1`. If empty, it creates a default seller account using environment variables (`DEFAULT_SELLER_EMAIL`, `DEFAULT_SELLER_PASS`). The user is forced to change the password on first login.

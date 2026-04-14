@@ -5,6 +5,7 @@ import { LiveFeed } from './pages/LiveFeed';
 import { SessionDetail } from './pages/SessionDetail';
 import { Settings } from './pages/Settings';
 import { Dispatch } from './pages/Dispatch';
+import { Sessions } from './pages/Sessions';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { fetchWithAuth, API } from './lib/api';
 
@@ -25,7 +26,7 @@ const AppRoutes: React.FC = () => {
 
   useEffect(() => {
     // Check for existing auth token in localStorage
-    const token = localStorage.getItem('vibesoko_token');
+    const token = localStorage.getItem('livesoko_token');
     if (token) {
       fetchWithAuth('/api/settings')
         .then(res => {
@@ -39,7 +40,7 @@ const AppRoutes: React.FC = () => {
           });
         })
         .catch(() => {
-          localStorage.removeItem('vibesoko_token');
+          localStorage.removeItem('livesoko_token');
         })
         .finally(() => setLoading(false));
     } else {
@@ -58,7 +59,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/dashboard/live" element={<ProtectedRoute><LiveFeed /></ProtectedRoute>} />
           <Route path="/dashboard/dispatch" element={<ProtectedRoute allowedRoles={['seller']}><Dispatch /></ProtectedRoute>} />
           <Route path="/dashboard/session/:id" element={<ProtectedRoute allowedRoles={['seller']}><SessionDetail /></ProtectedRoute>} />
-          <Route path="/dashboard/sessions" element={<ProtectedRoute allowedRoles={['seller']}><div className="p-8 text-center text-text-secondary mt-20 font-body">Sessions list — coming in v2.2</div></ProtectedRoute>} />
+          <Route path="/dashboard/sessions" element={<ProtectedRoute allowedRoles={['seller']}><Sessions /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute allowedRoles={['seller']}><Settings /></ProtectedRoute>} />
         </Routes>
         <NavBar />
@@ -100,13 +101,13 @@ const NavBar = () => {
             <span className="text-xl mb-1">🏍️</span>
             <span className="text-[10px] font-display font-bold uppercase">Dispatch</span>
           </NavLink>
-          <div 
-            onClick={() => navigate('/dashboard/sessions')}
-            className={`flex flex-col items-center justify-center w-full h-full cursor-pointer transition-all ${location.pathname === '/dashboard/sessions' ? 'text-brand-primary' : 'text-text-muted hover:text-text-secondary'}`}
+          <NavLink
+            to="/dashboard/sessions"
+            className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full transition-colors ${isActive ? 'text-brand-primary' : 'text-text-muted hover:text-text-secondary'}`}
           >
             <span className="text-xl mb-0.5">📊</span>
             <span className="text-[10px] font-display font-medium uppercase tracking-tight">Sessions</span>
-          </div>
+          </NavLink>
           <NavLink 
             to="/dashboard/settings" 
             className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full transition-colors ${isActive ? 'text-brand-primary' : 'text-text-muted hover:text-text-secondary'}`}

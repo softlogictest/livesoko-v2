@@ -1,4 +1,4 @@
-# DukaLive v2.1 — Local-First Build Plan (STRESS-TESTED)
+# LiveSoko v2.1 — Local-First Build Plan (STRESS-TESTED)
 
 ## Core Principles
 1. **RELIABLE first** — every choice asks "what if this breaks?"
@@ -13,7 +13,7 @@
 ```
 Seller's Laptop
 ├── Express (0.0.0.0:3000)
-│   ├── SQLite (dukalive.db) in WAL mode
+│   ├── SQLite (livesoko.db) in WAL mode
 │   ├── Google Sheets Poller (every 5s during active session)
 │   ├── SSE /api/events (realtime push to browsers)
 │   ├── SMS webhook (M-Pesa from phone on local network)
@@ -61,7 +61,7 @@ Seller's Laptop
 ### 5. SMS Forwarder can't reach laptop IP
 **Risk:** M-Pesa verification fails, all orders stuck on PENDING
 **Mitigation:**
-- Express prints clear local IP on startup: `"DukaLive running at http://192.168.1.50:3000"`
+- Express prints clear local IP on startup: `"LiveSoko running at http://192.168.1.50:3000"`
 - Settings screen shows the SMS Forwarder URL to copy
 - Add a **"Test Connection"** button in Settings that sends a test SMS to verify the link
 - If on hotspot, the IP is typically `192.168.43.1` (Android standard)
@@ -90,7 +90,7 @@ Google Form → auto-saves to Google Sheet (zero code, built-in)
                         ↓
 Seller publishes Sheet: File → Share → Publish to web → CSV
                         ↓
-Seller pastes the CSV URL into DukaLive Settings
+Seller pastes the CSV URL into LiveSoko Settings
                         ↓
 Backend fetches CSV every 5 seconds (only during active session)
                         ↓
@@ -130,31 +130,31 @@ New rows → INSERT into orders table → SSE broadcast
 | `lib/database.js` | NEW | SQLite init (WAL mode), table schemas, query helpers |
 | `lib/sheetPoller.js` | NEW | Google Sheets CSV poller with backoff |
 | `routes/events.js` | NEW | SSE endpoint for realtime |
-| [middleware/auth.js](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/backend/middleware/auth.js) | REWRITE | bcrypt local auth |
-| [routes/auth.js](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/backend/routes/auth.js) | REWRITE | Login/logout endpoints |
-| [routes/orders.js](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/backend/routes/orders.js) | REWRITE | SQLite + SSE broadcast |
-| [routes/sessions.js](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/backend/routes/sessions.js) | REWRITE | SQLite |
-| [routes/sms.js](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/backend/routes/sms.js) | REWRITE | SQLite (matching engine logic identical) |
-| [routes/settings.js](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/backend/routes/settings.js) | REWRITE | SQLite |
-| [index.js](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/backend/index.js) | REWRITE | Init DB, start poller, serve frontend, print IP |
+| [middleware/auth.js](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/backend/middleware/auth.js) | REWRITE | bcrypt local auth |
+| [routes/auth.js](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/backend/routes/auth.js) | REWRITE | Login/logout endpoints |
+| [routes/orders.js](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/backend/routes/orders.js) | REWRITE | SQLite + SSE broadcast |
+| [routes/sessions.js](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/backend/routes/sessions.js) | REWRITE | SQLite |
+| [routes/sms.js](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/backend/routes/sms.js) | REWRITE | SQLite (matching engine logic identical) |
+| [routes/settings.js](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/backend/routes/settings.js) | REWRITE | SQLite |
+| [index.js](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/backend/index.js) | REWRITE | Init DB, start poller, serve frontend, print IP |
 
 ### Phase B — Frontend: Remove Supabase
 
 | File | Action | Purpose |
 |------|--------|---------|
-| [App.tsx](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/frontend/src/App.tsx) | REWRITE | Local auth, API-based profile |
-| [Login.tsx](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/frontend/src/pages/Login.tsx) | REWRITE | POST /api/auth/login |
-| [LiveFeed.tsx](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/frontend/src/pages/LiveFeed.tsx) | MODIFY | SSE for realtime |
-| [useRealtime.ts](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/frontend/src/hooks/useRealtime.ts) | REWRITE | EventSource instead of Supabase |
-| [Settings.tsx](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/frontend/src/pages/Settings.tsx) | MODIFY | Show local IP, Sheet URL config |
-| [lib/supabase.ts](file:///c:/Users/Elitebook/OneDrive/Desktop/dukalive/frontend/src/lib/supabase.ts) | DELETE | No longer needed |
+| [App.tsx](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/frontend/src/App.tsx) | REWRITE | Local auth, API-based profile |
+| [Login.tsx](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/frontend/src/pages/Login.tsx) | REWRITE | POST /api/auth/login |
+| [LiveFeed.tsx](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/frontend/src/pages/LiveFeed.tsx) | MODIFY | SSE for realtime |
+| [useRealtime.ts](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/frontend/src/hooks/useRealtime.ts) | REWRITE | EventSource instead of Supabase |
+| [Settings.tsx](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/frontend/src/pages/Settings.tsx) | MODIFY | Show local IP, Sheet URL config |
+| [lib/supabase.ts](file:///c:/Users/Elitebook/OneDrive/Desktop/livesoko/frontend/src/lib/supabase.ts) | DELETE | No longer needed |
 
 ### Phase C — First-Run Experience
 
 On first `npm start`:
 1. SQLite database auto-created with tables
-2. Default seller account auto-generated (email: `seller@dukalive.local`, password: `dukalive`)
-3. Console prints: `DukaLive running at http://192.168.x.x:3000 — Open this on your phone!`
+2. Default seller account auto-generated (email: `seller@livesoko.local`, password: `livesoko`)
+3. Console prints: `LiveSoko running at http://192.168.x.x:3000 — Open this on your phone!`
 4. Login screen shows default credentials
 5. Settings screen guides through Google Sheet URL setup
 

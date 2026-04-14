@@ -72,7 +72,7 @@ export const Settings: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('vibesoko_token');
+    localStorage.removeItem('livesoko_token');
     dispatch({ type: 'SET_USER', payload: null });
   };
 
@@ -171,7 +171,7 @@ export const Settings: React.FC = () => {
           onClick={handleInstall}
           className="w-full py-4 mb-3 bg-brand-primary text-black rounded font-bold tracking-widest font-display text-lg animate-pulse"
         >
-          INSTALL VIBESOKO APP
+          INSTALL LIVESOKO APP
         </button>
       )}
 

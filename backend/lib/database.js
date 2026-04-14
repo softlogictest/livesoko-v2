@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const crypto = require('crypto');
 
-// DB_PATH env var lets Railway point this at a persistent volume (/data/vibesoko.db)
-// Falls back to the local vibesoko.db in development
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'vibesoko.db');
+// DB_PATH env var lets Railway point this at a persistent volume (/data/livesoko.db)
+// Falls back to the local livesoko.db in development
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'livesoko.db');
 let db;
 
 function init() {
@@ -17,10 +17,19 @@ function init() {
   }
 
   db = new Database(DB_PATH);
+  console.log(`[DB] Using database at: ${DB_PATH}`);
 
   // WAL mode for crash safety and better concurrent read performance
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
+
+  // Security Pillar: Cleanup expired tokens on startup
+  try {
+    const expiredCount = db.prepare("DELETE FROM auth_tokens WHERE expires_at < datetime('now')").run().changes;
+    if (expiredCount > 0) console.log(`[DB] Cleaned up ${expiredCount} expired sessions.`);
+  } catch (e) {
+    // Column might not exist yet if it's the first run before migration
+  }
 
   // Create all tables
   db.exec(`
@@ -242,14 +251,14 @@ function init() {
   const existing = db.prepare('SELECT id FROM profiles LIMIT 1').get();
   if (!existing) {
     const id = crypto.randomUUID();
-    const defaultEmail = process.env.DEFAULT_SELLER_EMAIL || 'admin@vibesoko.local';
-    const defaultPass = process.env.DEFAULT_SELLER_PASS || 'VibeSoko#2026!'; // Strong default
+    const defaultEmail = process.env.DEFAULT_SELLER_EMAIL || 'admin@livesoko.local';
+    const defaultPass = process.env.DEFAULT_SELLER_PASS || 'LiveSoko#2026!'; // Strong default
     const hash = bcrypt.hashSync(defaultPass, 12); 
     const token = 'tok_' + crypto.randomBytes(6).toString('hex');
 
     db.prepare(`
       INSERT INTO profiles (id, email, password_hash, must_change_password, role, shop_name, webhook_token)
-      VALUES (?, ?, ?, 1, 'seller', 'VibeSoko Master Shop', ?)
+      VALUES (?, ?, ?, 1, 'seller', 'LiveSoko Master Shop', ?)
     `).run(id, defaultEmail, hash, token);
 
     console.log('');

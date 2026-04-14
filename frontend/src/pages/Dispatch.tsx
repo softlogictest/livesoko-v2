@@ -41,7 +41,7 @@ export const Dispatch: React.FC = () => {
       .filter(o => o.payment_type === 'COD')
       .reduce((sum, o) => sum + (o.expected_amount || 0), 0);
     return [
-      `VIBESOKO DISPATCH — ${title} — ${date}`,
+      `LIVESOKO DISPATCH — ${title} — ${date}`,
       '',
       ...lines,
       '',

@@ -1,10 +1,16 @@
+# Dependencies
 node_modules/
+
+# Database (customer data stays local)
 *.db
 *.db-shm
 *.db-wal
+
+# Secrets
 .env
 .env.local
+.env.production
+
+# Build artifacts
 backend/public/
 frontend/dist/
-backend/clear_sheet_url.js
-backend/repair_db.js

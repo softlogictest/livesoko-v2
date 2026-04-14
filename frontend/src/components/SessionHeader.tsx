@@ -61,7 +61,7 @@ export const SessionHeader: React.FC<{ onSessionEnded?: (sessionId: string) => v
       <div className="bg-bg-surface border-b border-border-subtle p-4 sticky top-0 z-40 lg:shadow-md">
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-3">
-            <h1 className="font-display font-bold text-brand-primary text-xl tracking-wide">VibeSoko</h1>
+            <h1 className="font-display font-bold text-brand-primary text-xl tracking-wide">LiveSoko</h1>
             {activeSession && (
               <div className={`flex items-center gap-1.5 ${isHandyman ? 'bg-status-verified/20 text-status-verified' : 'bg-status-fraud/10 text-status-fraud'} px-2 py-0.5 rounded text-[10px] font-display font-bold uppercase tracking-widest`}>
                 <div className={`w-1.5 h-1.5 rounded-full ${isHandyman ? 'bg-status-verified' : 'bg-status-fraud'} animate-pulse`}></div>

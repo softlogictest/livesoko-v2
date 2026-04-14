@@ -14,6 +14,11 @@ router.post('/register', [
   body('password').matches(pwdRegex).withMessage('Password must be 8+ chars and include Uppercase, Lowercase, Number, and Special Character (@$!%*?&).'),
   body('shop_name').trim().notEmpty().withMessage('Shop name is required').isLength({ max: 50 }).escape()
 ], async (req, res) => {
+  // Security Pillar: Block registration if locked down
+  if (process.env.ALLOW_REGISTRATION === 'false') {
+    return res.status(403).json({ error: 'Public registration is disabled on this instance.' });
+  }
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 

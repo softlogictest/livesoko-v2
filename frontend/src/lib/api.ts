@@ -12,7 +12,7 @@ export const API = import.meta.env.PROD
  * 3. Handles 401 Unauthorized by clearing local session
  */
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('vibesoko_token');
+  const token = localStorage.getItem('livesoko_token');
   
   const headers = new Headers(options.headers || {});
   if (token) {
@@ -34,12 +34,12 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
      // If we ever rotate tokens, we'd handle it here.
   }
 
-  if (response.status === 401) {
+  if (response.status === 401 || response.status === 403) {
     // Session expired or invalid
     const data = await response.clone().json().catch(() => ({}));
-    if (data.code === 'TOKEN_EXPIRED' || data.code === 'UNAUTHORIZED') {
-      localStorage.removeItem('vibesoko_token');
-      // We don't want to force a reload here, but the next ProtectedRoute check will catch it
+    if (data.code === 'TOKEN_EXPIRED' || data.code === 'UNAUTHORIZED' || response.status === 401) {
+      localStorage.removeItem('livesoko_token');
+      window.dispatchEvent(new CustomEvent('auth-error'));
     }
   }
 

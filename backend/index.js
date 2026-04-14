@@ -45,9 +45,24 @@ const registerLimiter = rateLimit({
   message: { error: 'Too many accounts created. Please wait 1 hour.' }
 });
 
+// Security Pillar 5: Webhook & SMS Throttling (Protect DB from floods)
+const webhookLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: { error: 'Order intake busy. Please try again in 15 minutes.' }
+});
+
+const smsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200, // Higher limit for SMS as batches can come in
+  message: { error: 'SMS integration throttled.' }
+});
+
 app.use('/api/', limiter);
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth/register', registerLimiter);
+app.use('/api/orders/webhook', webhookLimiter);
+app.use('/api/sms/', smsLimiter);
 
 // CORS Lockdown
 const domain = process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : '*';
@@ -98,7 +113,7 @@ app.get('*', (req, res, next) => {
       // Frontend not built yet — show helpful message
       res.json({
         status: 'ok',
-        name: 'VibeSoko API v2.2.0',
+        name: 'LiveSoko API v2.2.0',
         message: 'Backend is running. Build the frontend with: cd frontend && npm run build'
       });
     }
@@ -107,7 +122,7 @@ app.get('*', (req, res, next) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', name: 'VibeSoko v2.2.0', mode: 'local' });
+  res.json({ status: 'ok', name: 'LiveSoko v2.2.0', mode: 'local' });
 });
 
 // Error handling
@@ -135,7 +150,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   const ip = getLocalIP();
   console.log('');
   console.log('╔══════════════════════════════════════════════════╗');
-  console.log('║              VibeSoko v2.2.0 — LOCAL             ║');
+  console.log('║              LiveSoko v2.2.0 — LOCAL             ║');
   console.log('╠══════════════════════════════════════════════════╣');
   console.log(`║  On this PC:    http://localhost:${PORT}             ║`);
   console.log(`║  On WiFi/LAN:   http://${ip}:${PORT}       ║`);
@@ -150,7 +165,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Port ${PORT} in use, trying ${altPort}...`);
     app.listen(altPort, '0.0.0.0', () => {
       const ip = getLocalIP();
-      console.log(`VibeSoko v2.2.0 running at http://${ip}:${altPort}`);
+      console.log(`LiveSoko v2.2.0 running at http://${ip}:${altPort}`);
     });
   } else {
     throw err;

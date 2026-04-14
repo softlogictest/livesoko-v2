@@ -1,6 +1,6 @@
 # SMS Forwarder Setup Guide
 
-This guide will show you how to set up the Android SMS Forwarder application so that every time you receive an M-Pesa payment, it is automatically forwarded to VibeSoko for real-time order matching.
+This guide will show you how to set up the Android SMS Forwarder application so that every time you receive an M-Pesa payment, it is automatically forwarded to LiveSoko for real-time order matching.
 
 ## Prerequisites
 - An Android Device that receives M-Pesa SMS messages.
@@ -18,10 +18,10 @@ We only want to forward M-Pesa messages, not your personal messages.
 - **Value**: Type exactly **M-PESA** (All caps).
 
 ### 3. Configure the Action (The Destination)
-We need to send the message to the VibeSoko Backend.
+We need to send the message to the LiveSoko Backend.
 - **Type**: Select **Webhook** or **Web**.
-- **URL**: Paste your unique Webhook URL here from your VibeSoko Settings page.
-  *(e.g., `https://vibesoko-api.railway.app/api/sms/tok_abc123`)*
+- **URL**: Paste your unique Webhook URL here from your LiveSoko Settings page.
+  *(e.g., `https://livesoko-api.railway.app/api/sms/tok_abc123`)*
 - **Method**: Select **POST**.
 - **Content Type**: `application/json`
 - **Body Template**: 
@@ -33,10 +33,10 @@ We need to send the message to the VibeSoko Backend.
 
 ### 4. Save and Test
 - Hit **Save**.
-- Tap **Test Rule** or send yourself a dummy message from "M-PESA" to verify your VibeSoko dashboard flashes green.
+- Tap **Test Rule** or send yourself a dummy message from "M-PESA" to verify your LiveSoko dashboard flashes green.
 
 ## Crucial: Battery Optimization Settings
-Android aggressively closes apps running in the background. If you do not change these settings, your phone will stop forwarding SMS messages when VibeSoko is closed.
+Android aggressively closes apps running in the background. If you do not change these settings, your phone will stop forwarding SMS messages when LiveSoko is closed.
 - **Samsung**: Settings > Apps > SMS Forwarder > Battery > Select "Unrestricted".
 - **Tecno / Infinix**: Open "Phone Master" > App Management > Auto-start Management > Allow SMS Forwarder. Additionally, go to Settings > App Management > App Settings > SMS Forwarder > Battery > "Don't optimize".
 - **Xiaomi (MIUI)**: Settings > Apps > Manage Apps > SMS Forwarder > Turn on "AutoStart". Battery Saver > Select "No restrictions".

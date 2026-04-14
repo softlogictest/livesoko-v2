@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "VibeSoko API",
+  "description": "LiveSoko API",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

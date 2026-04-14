@@ -70,6 +70,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, 3000);
   };
 
+  React.useEffect(() => {
+    const handleAuthError = () => {
+      dispatch({ type: 'SET_USER', payload: null });
+    };
+    window.addEventListener('auth-error', handleAuthError);
+    return () => window.removeEventListener('auth-error', handleAuthError);
+  }, []);
+
   return (
     <AppContext.Provider value={{ state, dispatch, notify }}>
       {children}

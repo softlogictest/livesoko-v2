@@ -1,7 +1,7 @@
 {
-  "name": "vibesoko",
+  "name": "livesoko",
   "version": "2.2.0",
-  "description": "VibeSoko — Local-first live commerce for social sellers",
+  "description": "LiveSoko — Local-first live commerce for social sellers",
   "scripts": {
     "build": "cd frontend && rm -f package-lock.json && npm install && npm run build && cp -r dist ../backend/public",
     "start": "cd backend && npm install && node index.js",

@@ -1,4 +1,4 @@
-# VibeSoko: Public Repository Security 🔓🛡️
+# LiveSoko: Public Repository Security 🔓🛡️
 
 Managing a public repository (like on GitHub) requires discipline to ensure your private data stays private.
 
@@ -9,14 +9,28 @@ Managing a public repository (like on GitHub) requires discipline to ensure your
 - **Logic Only**: The public repo contains the "Engine" (how the app works), not the "Fuel" (your specific data).
 
 ## 2. The Golden Rule: Use `.gitignore` 📂
-- Our root `.gitignore` specifically excludes `.env` and `*.db`.
-- **Critical**: Never remove `.env` from the `.gitignore`. If you accidentally commit a `.env` file, change your passwords/tokens immediately, even if you delete the file later (it stays in the Git history!).
+Our `.gitignore` excludes:
+- `.env` and `.env.local` — your secrets never leave your machine.
+- `*.db`, `*.db-shm`, `*.db-wal` — your customer data stays local.
+- `node_modules/` — dependencies are installed fresh per environment.
+- `backend/public/` and `frontend/dist/` — build artifacts are regenerated.
+- `backend/clear_sheet_url.js` and `backend/repair_db.js` — utility scripts stay local.
 
-## 3. Clearing Legacy Secrets
-In our recent audit, we found old Supabase keys in the local `.env` file. These have been **purged**. Even if the code is public, those keys are no longer active or referenced.
+> **Critical**: Never remove `.env` from the `.gitignore`. If you accidentally commit a `.env` file, change your passwords/tokens immediately, even if you delete the file later (it stays in the Git history forever!).
 
-## 4. Recommendations for Public Repos
-If you want to keep the repo public but feel extra secure:
-1. **GitHub Secrets**: If you use GitHub Actions to deploy, store your Railway tokens in "GitHub Secrets" instead of variables.
-2. **Rotating Tokens**: If you ever suspect a token (like your Google Webhook token) has been seen, generate a new one in the VibeSoko Settings tab and update your Apps Script.
-3. **Private Database**: Your actual orders are stored in `vibesoko.db`. Because this file is ignored by Git, it will NEVER appear on GitHub. Your data stays on your local machine or your Railway volume.
+## 3. What IS Safe on GitHub
+- All `.js`, `.ts`, `.tsx` source code (contains logic, not secrets).
+- `package.json` files (dependency lists, not credentials).
+- Documentation in `/docs`.
+- Configuration files like `railway.json`, `tailwind.config.js`, `vite.config.ts`.
+
+## 4. What is NOT Safe on GitHub
+- `.env` files (contains DB paths, default passwords).
+- `*.db` files (contains actual customer order data).
+- Any file with an API key, token, or password hardcoded in it.
+
+## 5. If You Suspect Exposure
+1. **Rotate tokens immediately**: Generate a new webhook token in LiveSoko Settings.
+2. **Change passwords**: Update your admin password via the LiveSoko UI.
+3. **Revoke GitHub PATs**: Go to GitHub → Settings → Developer Settings → Personal Access Tokens and revoke any compromised tokens.
+4. **Check git history**: Run `git log --all --oneline -- backend/.env` to see if secrets were ever committed. If so, use `git filter-branch` or BFG Repo-Cleaner to scrub them from history.

@@ -1,6 +1,6 @@
-# VibeSoko: Security Architecture 🛡️
+# LiveSoko: Security Architecture 🛡️
 
-VibeSoko follows the **"Pillars of Hardening"** model, transforming the application from a simple prototype into a production-grade, multi-tenant platform.
+LiveSoko follows the **"Pillars of Hardening"** model, transforming the application from a simple prototype into a production-grade, multi-tenant platform.
 
 ## Pillar 1: Secure Authentication 🔑
 - **Strong Hashing**: Passwords are never stored in plain text. We use `bcrypt` with a cost factor of **12** to prevent brute-force recovery.
@@ -25,6 +25,8 @@ VibeSoko follows the **"Pillars of Hardening"** model, transforming the applicat
   - **Global**: 100 requests per 15 minutes.
   - **Login**: 5 attempts per 15 minutes (blocks brute-force).
   - **Registration**: 3 accounts per hour (blocks bot spam).
+  - **Webhook**: 50 orders per 15 minutes (prevents DB flood).
+  - **SMS**: 200 messages per 15 minutes (high limit for batch intake).
 - **Helmet Headers**: Automatically hides "X-Powered-By" (identifying Node.js) and sets security headers like `X-Frame-Options` to prevent clickjacking.
 
 ## Pillar 6: Multi-Tenant Data Isolation 🏘️

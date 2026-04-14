@@ -1,6 +1,6 @@
-# VibeSoko: Technical Stack 🛠️
+# LiveSoko: Technical Stack 🛠️
 
-VibeSoko is built using a modern, lightweight, and local-first architecture designed for maximum reliability in high-pressure sales environments (like TikTok Live).
+LiveSoko is built using a modern, lightweight, and local-first architecture designed for maximum reliability in high-pressure sales environments (like TikTok Live).
 
 ## 1. Core Frameworks
 - **Frontend**: [React 18](https://reactjs.org/) with [TypeScript](https://www.typescriptlang.org/). Chosen for its robust state management and type safety.
@@ -22,7 +22,7 @@ VibeSoko is built using a modern, lightweight, and local-first architecture desi
   - `express-validator`: Strict input sanitization.
 
 ## 4. Third-Party Integrations
-- **Order Intake**: [Google Forms](https://www.google.com/forms/about/) + [Google Apps Script](https://developers.google.com/apps-script). This allows sellers to use a familiar interface for data collection, which then pushes data directly to the VibeSoko API via a custom webhook.
+- **Order Intake**: [Google Forms](https://www.google.com/forms/about/) + [Google Apps Script](https://developers.google.com/apps-script). This allows sellers to use a familiar interface for data collection, which then pushes data directly to the LiveSoko API via a custom webhook.
 - **Hosting/Deployment**: [Railway](https://railway.app/). Chosen for its seamless GitHub integration and persistent volume support for the SQLite database.
 
 ## 5. PWA (Progressive Web App)

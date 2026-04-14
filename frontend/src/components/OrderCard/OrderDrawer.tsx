@@ -75,7 +75,7 @@ export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void 
   };
 
   const handleSendToRider = () => {
-    const message = `*VibeSoko Delivery Request*%0A%0A*Customer:* ${order.buyer_name}%0A*Phone:* ${order.buyer_phone}%0A*Item:* ${order.quantity}x ${order.item_name}%0A*Location:* ${order.delivery_location}%0A%0A_Please confirm dispatch._`;
+    const message = `*LiveSoko Delivery Request*%0A%0A*Customer:* ${order.buyer_name}%0A*Phone:* ${order.buyer_phone}%0A*Item:* ${order.quantity}x ${order.item_name}%0A*Location:* ${order.delivery_location}%0A%0A_Please confirm dispatch._`;
     window.open(`https://wa.me/?text=${message}`, '_blank');
   };
 
