@@ -78,7 +78,7 @@ router.patch('/', [
 // POST /api/settings/handymen — create a new shop staff account
 router.post('/handymen', [
   body('email').isEmail().withMessage('Valid email required').normalizeEmail(),
-  body('password').isLength({ min: 8 }).withMessage('Password must be 8+ characters for security'),
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters.'),
   body('role').optional().isIn(['manager', 'seller']).withMessage('Invalid role')
 ], async (req, res) => {
   const errors = validationResult(req);

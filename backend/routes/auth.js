@@ -5,8 +5,8 @@ const crypto = require('crypto');
 const { getDb } = require('../lib/database');
 const { body, validationResult } = require('express-validator');
 
-// Password complexity regex: 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
-const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+// Password requirements: Min 8 characters (Simplified for user convenience)
+const pwdRegex = /^.{8,}$/;
 
 // Helper to fetch user's shops
 function getUserShops(db, userId) {
@@ -21,7 +21,7 @@ function getUserShops(db, userId) {
 // POST /api/auth/register
 router.post('/register', [
   body('email').isEmail().withMessage('Enter a valid email').normalizeEmail(),
-  body('password').matches(pwdRegex).withMessage('Password must be 8+ chars and include Uppercase, Lowercase, Number, and Special Character (@$!%*?&).'),
+  body('password').matches(pwdRegex).withMessage('Password must be at least 8 characters.'),
   body('enterprise_name').trim().notEmpty().withMessage('Enterprise name is required').isLength({ max: 50 }).escape()
 ], async (req, res) => {
   // Security Pillar: Block registration if locked down
@@ -127,7 +127,7 @@ router.post('/login', [
 
 // POST /api/auth/change-password
 router.post('/change-password', [
-  body('new_password').matches(pwdRegex).withMessage('Password must be 8+ chars and include Uppercase, Lowercase, Number, and Special Character (@$!%*?&).')
+  body('new_password').matches(pwdRegex).withMessage('Password must be at least 8 characters.')
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
