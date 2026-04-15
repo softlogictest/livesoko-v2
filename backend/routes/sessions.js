@@ -16,9 +16,11 @@ router.post('/', [
   const shopId = req.user.shop_id;
   const { title } = req.body;
 
-  // Check for existing active session
-  const active = db.prepare('SELECT * FROM sessions WHERE shop_id = ? AND status = ?').get(shopId, 'active');
-  if (active) return res.status(400).json({ error: 'You already have an active session. End it first.' });
+  // Idempotent Start: Close any existing active sessions first to prevent "Ghost Locks"
+  db.prepare(`
+    UPDATE sessions SET status = 'ended', ended_at = datetime('now') 
+    WHERE shop_id = ? AND status = 'active'
+  `).run(shopId);
 
   const id = crypto.randomUUID();
   db.prepare(`

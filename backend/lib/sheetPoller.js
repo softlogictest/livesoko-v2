@@ -126,10 +126,10 @@ async function pollSheet(sheetUrl, sellerId, sessionId) {
 
       try {
         db.prepare(`
-          INSERT INTO orders (id, session_id, seller_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, buyer_mpesa_name, status)
+          INSERT INTO orders (id, session_id, shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, buyer_mpesa_name, status)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
         `).run(
-          id, sessionId, sellerId,
+          id, sessionId, shopId,
           mapped.buyer_name,
           mapped.buyer_tiktok || '@unknown',
           phone,

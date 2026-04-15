@@ -123,125 +123,141 @@ export const PublicOrderPage: React.FC = () => {
             <h1 className="text-xl font-bold text-brand-primary leading-tight">{shop?.name}</h1>
             <p className="text-[10px] text-text-secondary uppercase tracking-widest font-display">Official Order Page</p>
           </div>
-          <div className="px-3 py-1 bg-brand-primary/10 text-brand-primary rounded-full text-[10px] font-bold animate-pulse">
-            🔴 LIVE NOW
-          </div>
+          {shop?.is_live && (
+            <div className="px-3 py-1 bg-brand-primary/10 text-brand-primary rounded-full text-[10px] font-bold animate-pulse">
+              🔴 LIVE NOW
+            </div>
+          )}
         </div>
       </div>
 
       <div className="max-w-md mx-auto p-6 pb-12">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <section className="space-y-4">
-            <h2 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Item Details</h2>
-            
-            <div className="space-y-2">
-              <label className="text-xs text-text-secondary ml-1">What are you buying?</label>
-              <input 
-                required
-                type="text"
-                placeholder="e.g. Green Dress, Wireless Buds"
-                className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
-                value={formData.item_name}
-                onChange={e => setFormData({...formData, item_name: e.target.value})}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs text-text-secondary ml-1">Quantity</label>
-                <input 
-                  required
-                  type="number"
-                  min="1"
-                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
-                  value={formData.quantity}
-                  onChange={e => setFormData({...formData, quantity: parseInt(e.target.value)})}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs text-text-secondary ml-1">Price (Ksh)</label>
-                <input 
-                  required
-                  type="number"
-                  min="0"
-                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
-                  value={formData.unit_price}
-                  onChange={e => setFormData({...formData, unit_price: parseInt(e.target.value)})}
-                />
-              </div>
-            </div>
-          </section>
-
-          <section className="space-y-4 pt-4 border-t border-border-subtle">
-            <h2 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Your Details</h2>
-            
-            <div className="space-y-2">
-              <label className="text-xs text-text-secondary ml-1">Your Full Name</label>
-              <input 
-                required
-                type="text"
-                placeholder="Name on M-Pesa"
-                className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
-                value={formData.buyer_name}
-                onChange={e => setFormData({...formData, buyer_name: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs text-text-secondary ml-1">TikTok Handle</label>
-              <input 
-                required
-                type="text"
-                placeholder="@username"
-                className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all text-brand-primary font-bold"
-                value={formData.buyer_tiktok}
-                onChange={e => setFormData({...formData, buyer_tiktok: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs text-text-secondary ml-1">Phone Number</label>
-              <input 
-                required
-                type="tel"
-                placeholder="0712 345 678"
-                className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
-                value={formData.buyer_phone}
-                onChange={e => setFormData({...formData, buyer_phone: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs text-text-secondary ml-1">Delivery Location</label>
-              <input 
-                required
-                type="text"
-                placeholder="e.g. Nairobi CBD, Estate Name"
-                className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
-                value={formData.delivery_location}
-                onChange={e => setFormData({...formData, delivery_location: e.target.value})}
-              />
-            </div>
-          </section>
-
-          <footer className="pt-6">
-            <div className="bg-brand-primary/5 p-4 rounded-2xl mb-6 border border-brand-primary/10">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-text-secondary text-sm">Total Amount</span>
-                <span className="text-2xl font-bold text-brand-primary">Ksh {formData.quantity * formData.unit_price}</span>
-              </div>
-              <p className="text-[10px] text-text-muted text-center italic">Pay after clicking the button below</p>
-            </div>
-
+        {!shop?.is_live ? (
+          <div className="py-20 text-center space-y-4">
+            <div className="text-6xl mb-6 opacity-40">😴</div>
+            <h2 className="text-2xl font-bold">Shop is Currently Offline</h2>
+            <p className="text-text-secondary">Please wait for the seller to go live to place your order!</p>
             <button 
-              type="submit"
-              disabled={loading}
-              className="w-full bg-brand-primary text-bg-base font-bold py-4 rounded-2xl text-lg shadow-[0_10px_30px_rgba(0,255,136,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+              onClick={() => window.location.reload()}
+              className="mt-6 px-6 py-2 bg-bg-surface border border-border-subtle rounded-xl text-sm"
             >
-              {loading ? 'Sinking order...' : 'PLACE ORDER NOW'}
+              Refresh Status
             </button>
-          </footer>
-        </form>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <section className="space-y-4">
+              <h2 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Item Details</h2>
+              
+              <div className="space-y-2">
+                <label className="text-xs text-text-secondary ml-1">What are you buying?</label>
+                <input 
+                  required
+                  type="text"
+                  placeholder="e.g. Green Dress, Wireless Buds"
+                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                  value={formData.item_name}
+                  onChange={e => setFormData({...formData, item_name: e.target.value})}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs text-text-secondary ml-1">Quantity</label>
+                  <input 
+                    required
+                    type="number"
+                    min="1"
+                    className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                    value={formData.quantity}
+                    onChange={e => setFormData({...formData, quantity: parseInt(e.target.value)})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-text-secondary ml-1">Price (Ksh)</label>
+                  <input 
+                    required
+                    type="number"
+                    min="0"
+                    className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                    value={formData.unit_price}
+                    onChange={e => setFormData({...formData, unit_price: parseInt(e.target.value)})}
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-4 pt-4 border-t border-border-subtle">
+              <h2 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Your Details</h2>
+              
+              <div className="space-y-2">
+                <label className="text-xs text-text-secondary ml-1">Your Full Name</label>
+                <input 
+                  required
+                  type="text"
+                  placeholder="Name on M-Pesa"
+                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                  value={formData.buyer_name}
+                  onChange={e => setFormData({...formData, buyer_name: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs text-text-secondary ml-1">TikTok Handle</label>
+                <input 
+                  required
+                  type="text"
+                  placeholder="@username"
+                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all text-brand-primary font-bold"
+                  value={formData.buyer_tiktok}
+                  onChange={e => setFormData({...formData, buyer_tiktok: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs text-text-secondary ml-1">Phone Number</label>
+                <input 
+                  required
+                  type="tel"
+                  placeholder="0712 345 678"
+                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                  value={formData.buyer_phone}
+                  onChange={e => setFormData({...formData, buyer_phone: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs text-text-secondary ml-1">Delivery Location</label>
+                <input 
+                  required
+                  type="text"
+                  placeholder="e.g. Nairobi CBD, Estate Name"
+                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                  value={formData.delivery_location}
+                  onChange={e => setFormData({...formData, delivery_location: e.target.value})}
+                />
+              </div>
+            </section>
+
+            <footer className="pt-6">
+              <div className="bg-brand-primary/5 p-4 rounded-2xl mb-6 border border-brand-primary/10">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-text-secondary text-sm">Total Amount</span>
+                  <span className="text-2xl font-bold text-brand-primary">Ksh {formData.quantity * formData.unit_price}</span>
+                </div>
+                <p className="text-[10px] text-text-muted text-center italic">Pay after clicking the button below</p>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={loading}
+                className="w-full bg-brand-primary text-bg-base font-bold py-4 rounded-2xl text-lg shadow-[0_10px_30px_rgba(0,255,136,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+              >
+                {loading ? 'Sinking order...' : 'PLACE ORDER NOW'}
+              </button>
+            </footer>
+          </form>
+        )}
       </div>
     </div>
   );

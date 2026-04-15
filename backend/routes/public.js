@@ -17,12 +17,16 @@ router.get('/shop/:slug', (req, res) => {
   if (!shop) return res.status(404).json({ error: 'Shop not found' });
   if (shop.status !== 'active') return res.status(403).json({ error: 'This shop is currently inactive' });
 
+  // Check if live
+  const activeSession = db.prepare('SELECT id FROM sessions WHERE shop_id = ? AND status = ?').get(shop.id, 'active');
+
   // Safety: Don't provide internal IDs or secrets
   res.json({
     id: shop.id,
     name: shop.name,
     slug: shop.slug,
-    color_scheme: shop.color_scheme || 'acid-green'
+    color_scheme: shop.color_scheme || 'acid-green',
+    is_live: !!activeSession
   });
 });
 
