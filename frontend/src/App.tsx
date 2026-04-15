@@ -9,6 +9,7 @@ import { Sessions } from './pages/Sessions';
 import { Billing } from './pages/Billing';
 import { PublicOrderPage } from './pages/PublicOrderPage';
 import { Network } from './pages/Network';
+import { NotFound } from './pages/NotFound';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { fetchWithAuth, API } from './lib/api';
 
@@ -67,7 +68,9 @@ const AppRoutes: React.FC = () => {
           <Route path="/dashboard/network" element={<ProtectedRoute requireManager><Network /></ProtectedRoute>} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/@:slug" element={<PublicOrderPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/s/:slug" element={<PublicOrderPage />} />
+          <Route path="/404" element={<NotFound />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <NavBar />
       </div>
@@ -91,7 +94,12 @@ const ProtectedRoute = ({ children, requireManager }: { children: React.ReactNod
 const NavBar = () => {
   const { state } = useAppContext();
   const location = useLocation();
-  if (location.pathname === '/login' || location.pathname.startsWith('/@')) return null;
+  const isPublicPath = location.pathname === '/login' || 
+                       location.pathname === '/404' || 
+                       location.pathname.startsWith('/@') || 
+                       location.pathname.startsWith('/s/');
+
+  if (isPublicPath) return null;
 
   const role = state.activeShop?.role;
   const isManagerOrOwner = role === 'owner' || role === 'manager';

@@ -30,7 +30,7 @@ export const PublicOrderPage: React.FC = () => {
         setLoading(false);
       })
       .catch(err => {
-        setError(err.message);
+        setError(err.message === 'Shop not found or inactive' ? 'This shop does not exist or has been disabled.' : err.message);
         setLoading(false);
       });
   }, [slug]);

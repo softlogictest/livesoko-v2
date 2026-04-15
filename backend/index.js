@@ -119,6 +119,12 @@ const frontendPath = fs.existsSync(path.join(frontendPublic, 'index.html'))
 console.log('Serving frontend from:', frontendPath);
 
 app.use(express.static(frontendPath));
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', name: 'LiveSoko v2.2.0', mode: 'local' });
+});
+
 app.get('*', (req, res, next) => {
   // Don't serve index.html for API routes
   if (req.path.startsWith('/api/')) return next();
@@ -132,11 +138,6 @@ app.get('*', (req, res, next) => {
       });
     }
   });
-});
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', name: 'LiveSoko v2.2.0', mode: 'local' });
 });
 
 // Error handling
