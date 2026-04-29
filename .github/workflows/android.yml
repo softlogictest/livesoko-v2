@@ -23,8 +23,11 @@ jobs:
       with:
         gradle-version: 8.5
 
+    - name: Accept Android SDK Licenses
+      run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
     - name: Build with Gradle
-      run: gradle assembleDebug --stacktrace
+      run: gradle assembleDebug --info --stacktrace
       working-directory: ./livesoko-sync-native
 
     - name: Upload APK
