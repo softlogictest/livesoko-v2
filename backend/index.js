@@ -15,6 +15,10 @@ const sessionsRouter = require('./routes/sessions');
 // Initialize database FIRST (creates tables + default account)
 const db = initDb();
 
+// Initialize Shadow Sync AI Data Extractor
+const { initShadowSync } = require('./jobs/shadowSync');
+initShadowSync();
+
 const app = express();
 
 // Security Pillar 6: Trust Proxy (Crucial for Railway/Load Balancers)
@@ -86,7 +90,7 @@ app.use(cors({
 app.use(express.json());
 
 // Auth middleware (import after db init)
-const { authenticate } = require('./middleware/auth');
+const { authenticate, checkBilling } = require('./middleware/auth');
 
 // Public routes (no auth required)
 app.use('/api/auth', require('./routes/auth'));
@@ -103,10 +107,10 @@ app.post('/api/orders/webhook', (req, res, next) => {
 });
 
 // Protected routes
-app.use('/api/orders', authenticate, ordersRouter);
-app.use('/api/payments', authenticate, paymentsRouter);
-app.use('/api/sessions', authenticate, sessionsRouter);
-app.use('/api/settings', authenticate, require('./routes/settings'));
+app.use('/api/orders', authenticate, checkBilling, ordersRouter);
+app.use('/api/payments', authenticate, checkBilling, paymentsRouter);
+app.use('/api/sessions', authenticate, checkBilling, sessionsRouter);
+app.use('/api/settings', authenticate, require('./routes/settings')); // Settings does not use checkBilling so users can manage billing
 app.use('/api/admin', authenticate, adminRouter);
 
 // Serve React frontend

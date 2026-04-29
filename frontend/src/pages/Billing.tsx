@@ -27,10 +27,21 @@ export const Billing: React.FC = () => {
         <div className="bg-bg-surface border border-border-subtle rounded-lg p-6 mb-8 text-left shadow-lg">
           <h2 className="font-display font-bold text-lg text-text-primary mb-4 border-b border-border-subtle pb-2">How to Renew</h2>
           <ul className="space-y-4 font-body text-sm text-text-secondary list-disc pl-4">
-            <li>Choose your tier: <strong className="text-brand-primary">Shop</strong> (Ksh X/mo) or <strong className="text-brand-primary">Suite</strong> (Ksh Y/mo).</li>
-            <li>Send the payment via MPESA (Paybill integration coming soon).</li>
-            <li>Send the MPESA Confirmation Code to your LiveSoko Administrator.</li>
+            <li>The LiveSoko Pro tier is <strong className="text-brand-primary">Ksh 1,000 / month</strong>.</li>
+            <li>Send the payment via <strong>M-Pesa Buy Goods</strong> to Till Number: <strong className="text-white bg-brand-primary/20 px-2 py-0.5 rounded border border-brand-primary">[TILL_NUMBER_HERE]</strong>.</li>
+            <li>Send the M-Pesa confirmation code to our WhatsApp support line to instantly unlock your account.</li>
           </ul>
+          
+          <div className="mt-6 text-center">
+            <a 
+              href="https://softlogic.co.ke" 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-xs text-brand-primary hover:underline uppercase tracking-widest font-bold"
+            >
+              View Pricing on SoftLOGIC Website ↗
+            </a>
+          </div>
         </div>
 
         <button
