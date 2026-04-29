@@ -17,13 +17,14 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
 
-    - name: Set Android SDK path
-      run: echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: 8.5
 
     - name: Build with Gradle
-      run: gradle assembleDebug
+      run: gradle assembleDebug --stacktrace
       working-directory: ./livesoko-sync-native
 
     - name: Upload APK
