@@ -22,11 +22,12 @@ class MainActivity : AppCompatActivity() {
 
         val etWebhookUrl = findViewById<EditText>(R.id.etWebhookUrl)
         val btnSave = findViewById<Button>(R.id.btnSave)
+        val btnTest = findViewById<Button>(R.id.btnTest)
         val tvStatus = findViewById<TextView>(R.id.tvStatus)
 
         // Load existing URL
         val prefs = getSharedPreferences("LiveSokoPrefs", Context.MODE_PRIVATE)
-        val savedUrl = prefs.getString("webhookUrl", "")
+        val savedUrl = prefs.getString("webhook_url", "")
         etWebhookUrl.setText(savedUrl)
 
         if (savedUrl?.isNotEmpty() == true) {
@@ -41,9 +42,18 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            prefs.edit().putString("webhookUrl", url).apply()
+            prefs.edit().putString("webhook_url", url).apply()
             
             checkPermissionAndStart(tvStatus)
+        }
+
+        btnTest.setOnClickListener {
+            val url = etWebhookUrl.text.toString().trim()
+            if (url.isEmpty()) {
+                Toast.makeText(this, "Save a URL first!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            SmsReceiver.forwardSms(this, url, "TEST-SENDER", "This is a test message from LiveSoko App.")
         }
         
         // Auto check permission on start if URL exists

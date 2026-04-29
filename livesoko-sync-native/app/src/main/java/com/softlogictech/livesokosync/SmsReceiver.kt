@@ -15,14 +15,11 @@ import java.util.concurrent.Executors
 
 class SmsReceiver : BroadcastReceiver() {
     
-    private val TAG = "LiveSokoSmsReceiver"
-    private val executor = Executors.newSingleThreadExecutor()
-
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
         val prefs = context.getSharedPreferences("LiveSokoPrefs", Context.MODE_PRIVATE)
-        val webhookUrl = prefs.getString("webhook_url", "") // Fixed key to match MainActivity
+        val webhookUrl = prefs.getString("webhook_url", "")
 
         if (webhookUrl.isNullOrEmpty()) {
             Log.w(TAG, "No webhook URL configured. Ignoring SMS.")
@@ -40,50 +37,55 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun forwardSms(context: Context, urlStr: String, sender: String, body: String) {
-        executor.execute {
-            try {
-                val url = URL(urlStr)
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json")
-                conn.setRequestProperty("Accept", "application/json")
-                conn.doOutput = true
-                conn.connectTimeout = 10000
-                conn.readTimeout = 10000
+    companion object {
+        private const val TAG = "LiveSokoSmsReceiver"
+        private val executor = Executors.newSingleThreadExecutor()
 
-                // Escape quotes simply to avoid JSON parser errors
-                val safeBody = body.replace("\"", "\\\"").replace("\n", "\\n")
-                val safeSender = sender.replace("\"", "\\\"")
+        fun forwardSms(context: Context, urlStr: String, sender: String, body: String) {
+            executor.execute {
+                try {
+                    val url = URL(urlStr)
+                    val conn = url.openConnection() as HttpURLConnection
+                    conn.requestMethod = "POST"
+                    conn.setRequestProperty("Content-Type", "application/json")
+                    conn.setRequestProperty("Accept", "application/json")
+                    conn.doOutput = true
+                    conn.connectTimeout = 10000
+                    conn.readTimeout = 10000
 
-                val jsonPayload = """
-                    {
-                        "sender_number": "$safeSender",
-                        "message": "$safeBody"
+                    // Escape quotes simply to avoid JSON parser errors
+                    val safeBody = body.replace("\"", "\\\"").replace("\n", "\\n")
+                    val safeSender = sender.replace("\"", "\\\"")
+
+                    val jsonPayload = """
+                        {
+                            "sender_number": "$safeSender",
+                            "message": "$safeBody"
+                        }
+                    """.trimIndent()
+
+                    val out = OutputStreamWriter(conn.outputStream)
+                    out.write(jsonPayload)
+                    out.flush()
+                    out.close()
+
+                    val responseCode = conn.responseCode
+                    Log.i(TAG, "Forwarded to $urlStr. Response Code: $responseCode")
+                    
+                    Handler(Looper.getMainLooper()).post {
+                        if (responseCode in 200..299) {
+                            Toast.makeText(context, "Sync Worked ✅", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Server Error: $responseCode", Toast.LENGTH_LONG).show()
+                        }
                     }
-                """.trimIndent()
-
-                val out = OutputStreamWriter(conn.outputStream)
-                out.write(jsonPayload)
-                out.flush()
-                out.close()
-
-                val responseCode = conn.responseCode
-                Log.i(TAG, "Forwarded to $urlStr. Response Code: $responseCode")
-                
-                Handler(Looper.getMainLooper()).post {
-                    if (responseCode in 200..299) {
-                        Toast.makeText(context, "SMS Synced ✅", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Server Error: $responseCode", Toast.LENGTH_LONG).show()
+                    
+                    conn.disconnect()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error forwarding SMS: ${e.message}", e)
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(context, "Network Error: ${e.message}", Toast.LENGTH_LONG).show()
                     }
-                }
-                
-                conn.disconnect()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error forwarding SMS: ${e.message}", e)
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(context, "Sync Failed: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
