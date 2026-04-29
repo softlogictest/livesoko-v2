@@ -8,32 +8,32 @@ const TutorialTab = ({ role }: { role?: string }) => {
   if (!isManagerOrOwner) {
     return (
       <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-        <h3 className="font-display font-medium text-lg text-brand-primary uppercase tracking-tighter italic">Seller Ops Guide</h3>
+        <h3 className="font-display font-medium text-lg text-brand-primary uppercase tracking-tighter italic">How to Use LiveSoko</h3>
         
         <div className="bg-bg-surface p-5 rounded-xl border border-border-subtle relative shadow-lg">
           <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-brand-primary text-black flex items-center justify-center font-bold text-lg font-display shadow-lg">1</div>
-          <h4 className="font-bold text-text-primary mb-2 mt-1 uppercase tracking-widest text-xs">Start the Live</h4>
+          <h4 className="font-bold text-text-primary mb-2 mt-1 uppercase tracking-widest text-xs">Wait for the Session to Start</h4>
           <p className="text-xs text-text-secondary leading-relaxed">
-            Go to the <strong>Live</strong> tab and tap <strong>START NEW SESSION</strong>. This wakes up the system and prepares your dashboard for incoming orders.
+            Your manager will start a live session. Once it's running, you'll see orders appear on the <strong>Live</strong> tab as customers place them.
           </p>
         </div>
 
         <div className="bg-bg-surface p-5 rounded-xl border border-border-subtle relative">
           <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-brand-primary/20 text-brand-primary flex items-center justify-center font-bold text-lg font-display">2</div>
-          <h4 className="font-bold text-text-primary mb-2 mt-1 uppercase tracking-widest text-xs">Watch the Ticker</h4>
+          <h4 className="font-bold text-text-primary mb-2 mt-1 uppercase tracking-widest text-xs">Pack Verified Orders</h4>
           <p className="text-xs text-text-secondary leading-relaxed">
-            As buyers use your hosted link (`livesoko.io/@slug`), orders appear here instantly.
+            Look for orders with a <strong>green ✓ VERIFIED</strong> tag — that means payment is confirmed. Pack these items and get them ready.
             <br/><br/>
-            🟢 <strong>Verified:</strong> Payment matched! Box it up.<br/>
-            ⚪ <strong>Pending:</strong> Payment hasn't arrived. Keep selling on Live!
+            ⚪ <strong>Pending</strong> = waiting for M-Pesa. Don't pack yet.<br/>
+            🟢 <strong>Verified</strong> = paid! Pack it up.
           </p>
         </div>
 
         <div className="bg-bg-surface p-5 rounded-xl border border-border-subtle relative">
           <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center font-bold text-lg font-display">3</div>
-          <h4 className="font-bold text-text-primary mb-2 mt-1 uppercase tracking-widest text-xs">WhatsApp Dispatch</h4>
+          <h4 className="font-bold text-text-primary mb-2 mt-1 uppercase tracking-widest text-xs">Send to Rider</h4>
           <p className="text-xs text-text-secondary leading-relaxed">
-            Tap on any 🟢 order and click <strong>SEND TO RIDER</strong>. This generates the delivery instructions for your riders automatically.
+            Tap on any verified order, then tap <strong>SEND TO RIDER</strong>. This opens WhatsApp with the customer's name, phone, item, and location already typed out for your rider.
           </p>
         </div>
       </div>
@@ -42,29 +42,29 @@ const TutorialTab = ({ role }: { role?: string }) => {
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300 pb-12">
-      <h3 className="font-display font-medium text-lg text-brand-primary uppercase tracking-tighter italic">Enterprise Launch Checklist</h3>
+      <h3 className="font-display font-medium text-lg text-brand-primary uppercase tracking-tighter italic">Getting Started</h3>
       
       <div className="bg-bg-surface p-5 rounded-xl border border-brand-primary/30 relative">
         <div className="absolute top-0 right-0 bg-brand-primary text-black text-[8px] font-bold px-2 py-1 uppercase">Step 1</div>
-        <h4 className="font-bold text-text-primary mb-1 uppercase tracking-widest text-xs">Claim Your Handle</h4>
+        <h4 className="font-bold text-text-primary mb-1 uppercase tracking-widest text-xs">Set Up Your Shop Link</h4>
         <p className="text-xs text-text-secondary leading-relaxed">
-          Go to <strong>Config</strong> and set your unique Shop Slug. This creates your public ordering link. Share this link on your TikTok Bio or Live pinning!
+          Go to the <strong>Config</strong> tab above and look for <strong>Customize Slug</strong>. Type your shop name there (e.g. "mystylehub"). This creates your order link — put it in your TikTok bio!
         </p>
       </div>
 
       <div className="bg-bg-surface p-5 rounded-xl border border-border-subtle relative">
         <div className="absolute top-0 right-0 bg-text-muted text-black text-[8px] font-bold px-2 py-1 uppercase">Step 2</div>
-        <h4 className="font-bold text-text-primary mb-1 uppercase tracking-widest text-xs">Sync M-Pesa</h4>
+        <h4 className="font-bold text-text-primary mb-1 uppercase tracking-widest text-xs">Start a Live Session</h4>
         <p className="text-xs text-text-secondary leading-relaxed">
-          Download the <strong>LiveSoko Sync APK</strong> (found in Config) onto the phone that receives your business M-Pesa. Paste your Webhook URL into the app to enable auto-verification.
+          Tap the <strong>Live</strong> tab at the bottom, then tap <strong>START NEW SESSION</strong>. While the session is running, customers can place orders through your shop link.
         </p>
       </div>
 
       <div className="bg-bg-surface p-5 rounded-xl border border-border-subtle relative">
         <div className="absolute top-0 right-0 bg-text-muted text-black text-[8px] font-bold px-2 py-1 uppercase">Step 3</div>
-        <h4 className="font-bold text-text-primary mb-1 uppercase tracking-widest text-xs">Monitor Your Web</h4>
+        <h4 className="font-bold text-text-primary mb-1 uppercase tracking-widest text-xs">Manage Your Orders</h4>
         <p className="text-xs text-text-secondary leading-relaxed">
-          Use the <strong>Network Web</strong> to ensure your phones were connected and your staff are active. A glowing phone node means your M-Pesa is syncing properly!
+          Orders appear on the Live tab as they come in. Tap any order to <strong>verify payment</strong>, <strong>mark it as packed</strong>, or <strong>send delivery info to your rider</strong> via WhatsApp.
         </p>
       </div>
     </div>
@@ -74,30 +74,38 @@ const TutorialTab = ({ role }: { role?: string }) => {
 const FAQTab = () => {
   const faqs = [
     {
-      q: 'Do I still need Google Forms?',
-      a: 'No! You can now use your Hosted Order Page (`livesoko.io/@slug`). It is much faster and doesn\'t require you to touch any Google Sheets code.'
+      q: 'How do customers place orders?',
+      a: 'Share your shop link (found in Config tab) on TikTok, WhatsApp, or anywhere. When customers tap it, they see an order form where they fill in what they want and their details.'
     },
     {
-      q: 'How do I change my shop URL?',
-      a: 'Go to the Config tab and update the "Shop Slug". For example, changing it to "mystylehub" makes your link livesoko.io/@mystylehub.'
+      q: 'How do I change my shop link?',
+      a: 'Go to the Config tab and update the text under "Customize Slug". For example, if you type "mystylehub", your link becomes /shop/mystylehub.'
     },
     {
-      q: 'What is the "Network Web"?',
-      a: 'It\'s a visual map of your enterprise. It shows if your owners, managers, and sellers are online, and exactly which phone is currently syncing your M-Pesa and orders.'
+      q: 'What do the order colors mean?',
+      a: 'Grey = waiting for payment. Green (Verified) = payment confirmed, pack the order! Red = flagged as suspicious. Blue = Cash on Delivery.'
     },
     {
-      q: 'Can I name my M-Pesa phones?',
-      a: 'Yes! Open the Network Web view and click on a phone node to give it a nickname like "Shop Main Phone" or "Dispatch S20".'
+      q: 'What if a payment doesn\'t match any order?',
+      a: 'A 💰 alert will pop up on the Live tab. Tap it to see the payment details and manually link it to the right order.'
     },
     {
-      q: 'What if a payment doesn\'t match?',
-      a: 'A 💰 bag will pulse on your screen. Tap it to see the "Floating Payment" and link it manually to the right order.'
+      q: 'Can my staff see all orders?',
+      a: 'Staff with the "Seller" role only see verified orders that are ready to pack. Managers and owners see everything including pending and flagged orders.'
+    },
+    {
+      q: 'How do I download and install the Companion App?',
+      a: 'Go to the Config tab and click "DOWNLOAD COMPANION APP". Once downloaded, tap the file to install it. If Android shows an "Unsafe App Blocked" warning, tap "More details" and then "Install anyway". This happens because our business tool isn\'t listed on the public Play Store.'
+    },
+    {
+      q: 'How do I send delivery info to my rider?',
+      a: 'Tap on any green (verified) order, then tap "SEND TO RIDER". It opens WhatsApp with all the delivery details already written out.'
     }
   ];
 
   return (
     <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300 pb-12">
-      <h3 className="font-display font-medium text-lg text-brand-primary mb-2">Frequently Asked Questions</h3>
+      <h3 className="font-display font-medium text-lg text-brand-primary mb-2">Common Questions</h3>
       <p className="text-xs text-text-muted mb-2 -mt-2">Tap any question below to see the answer.</p>
       {faqs.map((faq, i) => (
         <details key={i} className="bg-bg-surface border border-border-subtle rounded-xl overflow-hidden group">
@@ -105,7 +113,7 @@ const FAQTab = () => {
             {faq.q}
           </summary>
           <div className="p-4 text-sm text-text-secondary leading-relaxed bg-[#151515]">
-            <span className="font-bold text-brand-primary mr-1 flex-shrink-0">Answer:</span> {faq.a}
+            {faq.a}
           </div>
         </details>
       ))}
@@ -205,7 +213,8 @@ export const Settings: React.FC = () => {
   if (loading) return <div className="p-8 text-center text-text-muted">Loading...</div>;
 
   const currentIp = window.location.hostname;
-  const webhookUrl = `http://${currentIp}:3000/api/sms/${profile?.seller.webhook_token}`;
+  const currentPort = window.location.port || '3000';
+  const webhookUrl = `http://${currentIp}:${currentPort}/api/sms/${profile?.seller.webhook_token}`;
 
   return (
     <div className="bg-bg-base min-h-screen text-text-primary pb-24">
@@ -249,17 +258,33 @@ export const Settings: React.FC = () => {
             <div className="bg-bg-surface p-5 rounded-lg border border-brand-primary/30 relative">
               <div className="absolute top-0 right-0 bg-brand-primary text-black text-[8px] font-bold px-2 py-1 uppercase">Instant Setup</div>
               <h3 className="text-sm text-brand-primary uppercase mb-4 tracking-widest font-bold">Public Order Page</h3>
-              <p className="text-xs text-text-secondary mb-3">Copy this link and put it in your TikTok bio! Customers can use it to place orders without needing Google Forms.</p>
+              <p className="text-xs text-text-secondary mb-3">Copy this link and put it in your TikTok bio! Customers can order directly from here.</p>
               
               {profile?.seller?.slug ? (
                 <div className="flex gap-2">
                   <div className="flex-1 bg-bg-base p-3 rounded text-[11px] break-all text-brand-primary border border-brand-primary/20 font-mono">
-                    {window.location.origin}/@{profile?.seller.slug}
+                    {window.location.origin}/shop/{profile?.seller.slug}
                   </div>
                   <button 
                     onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/@${profile?.seller.slug}`);
-                      notify('Link copied to clipboard!', 'success');
+                      const url = `${window.location.origin}/shop/${profile?.seller.slug}`;
+                      // Clipboard API fails on mobile HTTP - use textarea fallback
+                      try {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = url;
+                        textarea.style.position = 'fixed';
+                        textarea.style.left = '-9999px';
+                        textarea.style.top = '-9999px';
+                        document.body.appendChild(textarea);
+                        textarea.focus();
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        notify('Link copied to clipboard!', 'success');
+                      } catch {
+                        // Last resort: show the URL in a prompt so user can manually copy
+                        window.prompt('Copy this link:', url);
+                      }
                     }}
                     className="bg-brand-primary text-black px-4 rounded font-bold text-xs hover:bg-brand-dim transition-colors"
                   >
@@ -346,33 +371,59 @@ export const Settings: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-bg-surface p-5 rounded-lg border border-border-subtle">
-              <h3 className="text-sm text-text-muted uppercase mb-4 tracking-widest">Advanced: SMS Forwarder URL</h3>
+            <div className="bg-bg-surface p-5 rounded-lg border border-brand-primary/30 relative">
+              <div className="absolute top-0 right-0 bg-brand-primary text-black text-[8px] font-bold px-2 py-1 uppercase tracking-tighter">M-Pesa</div>
+              <h3 className="text-sm text-brand-primary uppercase mb-2 tracking-widest font-bold">Auto-Verify Payments</h3>
+              <p className="text-xs text-text-secondary mb-4 leading-relaxed">
+                Install the <strong>LiveSoko Companion App</strong> on the phone that receives M-Pesa messages. 
+                It runs securely in the background and automatically verifies orders when payment arrives.
+              </p>
 
-              <p className="text-xs text-text-secondary mb-3">Copy this URL into your SMS Forwarder app. Make sure your phone is on the same WiFi as this laptop.</p>
-              <div className="bg-bg-base p-3 rounded text-[10px] break-all text-brand-dim border border-brand-primary/20 select-all font-mono">
-                {webhookUrl}
+              <button 
+                onClick={() => window.location.href = 'https://github.com/SoftLOGICtech/dukalive/releases/latest/download/livesoko-sync.apk'}
+                className="w-full bg-brand-primary/20 text-brand-primary border border-brand-primary py-3 rounded-lg font-bold text-xs uppercase tracking-widest mb-6 hover:bg-brand-primary hover:text-black transition-colors flex items-center justify-center gap-2"
+              >
+                ⬇️ DOWNLOAD COMPANION APP
+              </button>
+              
+              <div className="mb-3">
+                <label className="text-[10px] uppercase text-text-muted font-bold block mb-2">Shop Connection Code (paste this into the app)</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 bg-bg-base p-3 rounded text-[10px] break-all text-brand-dim border border-brand-primary/20 select-all font-mono">
+                    {webhookUrl}
+                  </div>
+                  <button 
+                    onClick={() => {
+                      try {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = webhookUrl;
+                        textarea.style.position = 'fixed';
+                        textarea.style.left = '-9999px';
+                        textarea.style.top = '-9999px';
+                        document.body.appendChild(textarea);
+                        textarea.focus();
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        notify('Connection Code copied!', 'success');
+                      } catch {
+                        window.prompt('Copy this Connection Code:', webhookUrl);
+                      }
+                    }}
+                    className="bg-brand-primary text-black px-4 rounded font-bold text-xs hover:bg-brand-dim transition-colors flex-shrink-0"
+                  >
+                    COPY
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-bg-base border border-border-subtle rounded-lg p-3 mt-3">
+                <p className="text-[10px] text-text-muted leading-relaxed">
+                  <strong>Setup:</strong> Download App → Open it → Paste Connection Code → Tap Connect → Done.
+                  The app listens for M-Pesa SMS and verifies your LiveSoko orders automatically.
+                </p>
               </div>
             </div>
-
-            <details className="bg-bg-surface p-4 rounded-lg border border-border-subtle group">
-              <summary className="text-[10px] text-text-muted uppercase tracking-widest cursor-pointer select-none">Legacy: Google Sheet Integration</summary>
-              <div className="mt-4">
-                <p className="text-[10px] text-text-secondary mb-3">Paste your published Google Sheet CSV URL here for backward compatibility.</p>
-                <form onSubmit={handleUpdateSheet} className="flex flex-col gap-3">
-                  <input 
-                    type="url" 
-                    value={sheetUrl}
-                    onChange={e => setSheetUrl(e.target.value)}
-                    placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv"
-                    className="bg-bg-input border border-border-subtle p-3 rounded text-[11px] text-text-primary w-full outline-none focus:border-brand-primary"
-                  />
-                  <button type="submit" className="bg-[#222] border border-[#555] text-white px-4 py-2 rounded text-[10px] font-bold ml-auto hover:bg-[#333] transition-colors">
-                    SAVE URL
-                  </button>
-                </form>
-              </div>
-            </details>
 
             <div className="bg-bg-surface p-5 rounded-lg border border-border-subtle">
               <h3 className="text-sm text-text-muted uppercase mb-4 tracking-widest">Staff Management</h3>
@@ -437,28 +488,7 @@ export const Settings: React.FC = () => {
               </button>
             )}
 
-            <div className="bg-bg-surface p-5 rounded-lg border border-brand-primary/30 mt-4 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-brand-primary text-black text-[8px] font-bold px-2 py-1 uppercase tracking-tighter">Recommended</div>
-              <h3 className="text-sm text-brand-primary uppercase mb-2 tracking-widest font-bold">LiveSoko Sync (Android)</h3>
-              <p className="text-[11px] text-text-secondary mb-4 leading-relaxed">
-                Download our standalone Android app to automatically sync M-Pesa receipts. This is faster and more reliable than manual verification.
-              </p>
-              <a 
-                href="/downloads/livesoko_sync.apk" 
-                download
-                className="flex items-center justify-center gap-2 w-full py-4 bg-bg-base border border-brand-primary/50 text-brand-primary rounded-lg font-bold tracking-widest font-display text-sm hover:bg-brand-primary/10 transition-colors"
-                onClick={(e) => {
-                  // If the file doesn't exist yet, we show a helpful toast
-                  // In a real build, the user would place the APK in the public/downloads folder
-                  notify('LiveSoko Sync APK starting...', 'info');
-                }}
-              >
-                <span>📲</span> DOWNLOAD .APK
-              </a>
-              <div className="text-[9px] text-text-muted mt-3 text-center italic">
-                *Requires Android 8.0+. Must allow "Install from Unknown Sources".
-              </div>
-            </div>
+
           </div>
         )}
       </div>
