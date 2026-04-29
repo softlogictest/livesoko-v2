@@ -3,8 +3,11 @@ package com.softlogictech.livesokosync
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.provider.Telephony
 import android.util.Log
+import android.widget.Toast
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
@@ -19,7 +22,7 @@ class SmsReceiver : BroadcastReceiver() {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
         val prefs = context.getSharedPreferences("LiveSokoPrefs", Context.MODE_PRIVATE)
-        val webhookUrl = prefs.getString("webhookUrl", "")
+        val webhookUrl = prefs.getString("webhook_url", "") // Fixed key to match MainActivity
 
         if (webhookUrl.isNullOrEmpty()) {
             Log.w(TAG, "No webhook URL configured. Ignoring SMS.")
@@ -31,15 +34,13 @@ class SmsReceiver : BroadcastReceiver() {
             val sender = sms.originatingAddress ?: ""
             val body = sms.messageBody ?: ""
 
-            // Strict filter to only forward M-Pesa messages
-            if (sender.contains("MPESA", ignoreCase = true) || body.contains("MPESA", ignoreCase = true)) {
-                Log.d(TAG, "M-Pesa SMS detected! Forwarding to $webhookUrl")
-                forwardSms(webhookUrl, sender, body)
-            }
+            // Removed "MPESA" filter for initial connection testing
+            Log.d(TAG, "SMS detected! Forwarding to $webhookUrl")
+            forwardSms(context, webhookUrl, sender, body)
         }
     }
 
-    private fun forwardSms(urlStr: String, sender: String, body: String) {
+    private fun forwardSms(context: Context, urlStr: String, sender: String, body: String) {
         executor.execute {
             try {
                 val url = URL(urlStr)
@@ -70,15 +71,20 @@ class SmsReceiver : BroadcastReceiver() {
                 val responseCode = conn.responseCode
                 Log.i(TAG, "Forwarded to $urlStr. Response Code: $responseCode")
                 
-                if (responseCode in 200..299) {
-                    Log.i(TAG, "Successfully synced M-Pesa message.")
-                } else {
-                    Log.e(TAG, "Failed to sync. Server returned code $responseCode")
+                Handler(Looper.getMainLooper()).post {
+                    if (responseCode in 200..299) {
+                        Toast.makeText(context, "SMS Synced ✅", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Server Error: $responseCode", Toast.LENGTH_LONG).show()
+                    }
                 }
                 
                 conn.disconnect()
             } catch (e: Exception) {
                 Log.e(TAG, "Error forwarding SMS: ${e.message}", e)
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(context, "Sync Failed: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
