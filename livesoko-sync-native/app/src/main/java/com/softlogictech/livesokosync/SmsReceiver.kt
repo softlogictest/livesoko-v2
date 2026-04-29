@@ -31,9 +31,13 @@ class SmsReceiver : BroadcastReceiver() {
             val sender = sms.originatingAddress ?: ""
             val body = sms.messageBody ?: ""
 
-            // Removed "MPESA" filter for initial connection testing
-            Log.d(TAG, "SMS detected! Forwarding to $webhookUrl")
-            forwardSms(context, webhookUrl, sender, body)
+            // Production filter: Only forward if it looks like an M-Pesa message
+            if (sender.contains("MPESA", ignoreCase = true) || body.contains("MPESA", ignoreCase = true) || body.contains("M-PESA", ignoreCase = true)) {
+                Log.d(TAG, "M-PESA SMS detected! Forwarding to $webhookUrl")
+                forwardSms(context, webhookUrl, sender, body)
+            } else {
+                Log.d(TAG, "Ignored non-MPESA message from $sender")
+            }
         }
     }
 
