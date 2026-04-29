@@ -19,6 +19,9 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    - name: Set Android SDK path
+      run: echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+
     - name: Build with Gradle
       run: gradle assembleDebug
       working-directory: ./livesoko-sync-native
