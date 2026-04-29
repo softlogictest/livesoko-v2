@@ -488,6 +488,17 @@ export const Settings: React.FC = () => {
               </button>
             )}
 
+            <div className="mt-8 pt-6 border-t border-border-subtle/30 text-center">
+              <p className="text-[10px] text-text-muted uppercase tracking-[0.2em] mb-4">Thoughts? Ideas? Bugs?</p>
+              <button 
+                onClick={() => window.open('https://softlogic.co.ke', '_blank')}
+                className="w-full bg-bg-surface border border-border-subtle text-text-secondary py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:border-brand-primary hover:text-brand-primary transition-all flex items-center justify-center gap-2"
+              >
+                💬 GIVE FEEDBACK / SUGGESTIONS
+              </button>
+              <p className="text-[9px] text-text-muted mt-4 italic">LiveSoko v2.2.0 • Made with ❤️ by SoftLOGIC</p>
+            </div>
+
 
           </div>
         )}
