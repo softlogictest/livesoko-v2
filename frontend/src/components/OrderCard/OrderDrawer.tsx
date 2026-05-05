@@ -5,7 +5,7 @@ import { EditOrderModal } from '../EditOrderModal';
 import { API, fetchWithAuth } from '../../lib/api';
 
 export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void }> = ({ order, onClose }) => {
-  const { state } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const [showEditModal, setShowEditModal] = useState(false);
 
   const handleEdit = async (data: any) => {
@@ -59,10 +59,20 @@ export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void 
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this order? This cannot be undone.')) return;
-    await fetchWithAuth(`/api/orders/${order.id}`, {
-      method: 'DELETE'
-    });
-    onClose();
+    try {
+      const res = await fetchWithAuth(`/api/orders/${order.id}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Delete failed' }));
+        alert(err.error || 'Failed to delete order');
+        return;
+      }
+      dispatch({ type: 'DELETE_ORDER', payload: { id: order.id } });
+      onClose();
+    } catch {
+      alert('Failed to delete order');
+    }
   };
 
   const handleSendToRider = () => {
@@ -124,12 +134,19 @@ export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void 
           </div>
         )}
 
-        {order.mpesa_trace && (
+        {(order.mpesa_tx_code || (order as any).mpesa_raw_sms) && (
           <div className="mb-6">
-            <div className="text-text-muted text-xs mb-2">M-PESA TRACE</div>
-            <div className="bg-bg-base border border-border-subtle rounded p-3 text-text-secondary text-xs font-body break-words">
-              {order.mpesa_trace}
-            </div>
+            <div className="text-text-muted text-xs mb-2">M-PESA CONFIRMATION</div>
+            {order.mpesa_tx_code && (
+              <div className="bg-bg-base border border-status-verified/30 rounded p-3 text-status-verified text-sm font-bold font-mono mb-2">
+                TX: {order.mpesa_tx_code}
+              </div>
+            )}
+            {(order as any).mpesa_raw_sms && (
+              <div className="bg-bg-base border border-border-subtle rounded p-3 text-text-secondary text-xs font-body break-words">
+                {(order as any).mpesa_raw_sms}
+              </div>
+            )}
           </div>
         )}
 

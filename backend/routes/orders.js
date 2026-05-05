@@ -228,7 +228,7 @@ router.delete('/:id', (req, res) => {
   if (!order) return res.status(404).json({ error: 'Order not found or unauthorized' });
 
   db.prepare('DELETE FROM orders WHERE id = ? AND shop_id = ?').run(req.params.id, req.user.shop_id);
-  broadcast('order:deleted', { id: req.params.id });
+  broadcast('order:deleted', { id: req.params.id, shop_id: req.user.shop_id });
   res.json({ message: 'Order deleted' });
 });
 

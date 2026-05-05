@@ -37,6 +37,23 @@ function upsertDevice(db, shopId, senderNumber) {
   }
 }
 
+// POST /api/sms/ping/:webhook_token — Keep-alive for the forwarder
+router.post('/ping/:webhook_token', (req, res) => {
+  try {
+    const db = getDb();
+    const { webhook_token } = req.params;
+    const { sender_number } = req.body;
+
+    const seller = db.prepare('SELECT id FROM shops WHERE webhook_token = ?').get(webhook_token);
+    if (!seller) return res.status(404).json({ error: 'Invalid token' });
+
+    upsertDevice(db, seller.id, sender_number || 'Unknown Device');
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // POST /api/sms/:webhook_token — receive M-Pesa SMS
 router.post('/:webhook_token', (req, res) => {
   try {

@@ -239,6 +239,60 @@ function init() {
     console.log('[DB] Bad foreign keys fixed.');
   }
 
+  // --- MIGRATION: Phase 3 (Fix orders.shop_id FK pointing to profiles instead of shops) ---
+  let badOrderFk = false;
+  try {
+    badOrderFk = db.prepare("PRAGMA foreign_key_list(orders)").all().some(fk => fk.from === 'shop_id' && fk.table === 'profiles');
+  } catch(e) {}
+
+  if (badOrderFk) {
+    console.log('[DB] Fixing orders table FK (shop_id -> shops instead of profiles)...');
+    db.pragma('foreign_keys = OFF');
+    
+    db.exec(`
+      CREATE TABLE orders_fix (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+        shop_id TEXT NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+        buyer_name TEXT NOT NULL,
+        buyer_tiktok TEXT NOT NULL,
+        buyer_phone TEXT NOT NULL,
+        delivery_location TEXT NOT NULL,
+        coordinates TEXT,
+        item_name TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+        unit_price REAL NOT NULL,
+        expected_amount REAL GENERATED ALWAYS AS (quantity * unit_price) STORED,
+        payment_type TEXT NOT NULL DEFAULT 'MPESA' CHECK (payment_type IN ('MPESA', 'COD')),
+        buyer_mpesa_name TEXT,
+        mpesa_sender_name TEXT,
+        mpesa_amount REAL,
+        mpesa_tx_code TEXT UNIQUE,
+        mpesa_raw_sms TEXT,
+        mpesa_received_at TEXT,
+        status TEXT NOT NULL DEFAULT 'PENDING' CHECK (
+          status IN ('PENDING', 'COD_PENDING', 'VERIFIED', 'FRAUD', 'REVIEW', 'FULFILLED')
+        ),
+        status_reason TEXT,
+        fulfilled_at TEXT,
+        fulfilled_by TEXT REFERENCES profiles(id),
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO orders_fix (id, session_id, shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, coordinates, item_name, quantity, unit_price, payment_type, buyer_mpesa_name, mpesa_sender_name, mpesa_amount, mpesa_tx_code, mpesa_raw_sms, mpesa_received_at, status, status_reason, fulfilled_at, fulfilled_by, created_at, updated_at)
+      SELECT id, session_id, shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, coordinates, item_name, quantity, unit_price, payment_type, buyer_mpesa_name, mpesa_sender_name, mpesa_amount, mpesa_tx_code, mpesa_raw_sms, mpesa_received_at, status, status_reason, fulfilled_at, fulfilled_by, created_at, updated_at FROM orders;
+      DROP TABLE orders;
+      ALTER TABLE orders_fix RENAME TO orders;
+      CREATE INDEX IF NOT EXISTS idx_orders_session_id ON orders(session_id);
+      CREATE INDEX IF NOT EXISTS idx_orders_shop_id ON orders(shop_id);
+      CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+      CREATE INDEX IF NOT EXISTS idx_orders_mpesa_tx ON orders(mpesa_tx_code);
+    `);
+
+    db.pragma('foreign_keys = ON');
+    console.log('[DB] Orders FK fixed (shop_id now references shops).');
+  }
+
   // Ensure current tables exist for totally new instances
   db.exec(`
     CREATE TABLE IF NOT EXISTS profiles (

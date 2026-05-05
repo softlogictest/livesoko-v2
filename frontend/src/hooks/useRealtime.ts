@@ -65,5 +65,6 @@ export const useRealtime = () => {
       es.close();
       eventSourceRef.current = null;
     };
-  }, [dispatch, pulse, alert, state.user?.token, state.activeShop?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, state.user?.token, state.activeShop?.id]);
 };

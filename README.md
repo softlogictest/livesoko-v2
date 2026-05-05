@@ -1,11 +1,14 @@
-# LiveSoko 🎉📱🚀
+# LiveSoko 
 
 LiveSoko is a premium, high-speed, and secure platform for TikTok Live sellers. It streamlines the flow from customer purchase to rider dispatch with real-time updates and enterprise-grade data isolation.
 
 ## 🚀 Quick Start
 1. **Backend**: `cd backend && npm install && node index.js`
-2. **Frontend**: `cd frontend && npm install && npm run dev`
+2. **Frontend**: `cd frontend && npm install && npm run build`
 3. **Database**: SQLite database (`livesoko.db`) initializes automatically on first run.
+4. **Access**: Open `http://localhost:3000` on this PC, or the WiFi/LAN URL shown in the console on your phone.
+
+> **Note**: Frontend is built to `frontend/dist` and served by the backend. No separate frontend dev server needed for testing.
 
 ## 📖 Technical Documentation
 Explore our detailed guides in the `/docs` folder:
@@ -19,6 +22,8 @@ Explore our detailed guides in the `/docs` folder:
 - [**Edge Cases**](docs/EDGE_CASES.md): How the system handles duplicates and network drops.
 - [**Public Repo Security**](docs/REPO_SECURITY.md): How to keep your source code safe on GitHub.
 - [**AI Prompting Guide**](docs/PROMPTING_GUIDE.md): Best practices for future development.
+- [**SMS Forwarder Guide**](docs/guides/SMS_FORWARDER.md): Build and setup the native Android sync app.
+- [**Railway Deployment**](docs/guides/RAILWAY_DEPLOYMENT.md): How to host LiveSoko in the cloud.
 
 ## 📱 PWA Features
 - **Installable**: Full "Add to Home Screen" support for a native mobile experience.
@@ -32,13 +37,21 @@ Explore our detailed guides in the `/docs` folder:
 - Environment-based Secrets Management.
 - Granular Rate Limiting (Login, Register, Webhook, SMS, Global).
 
-## ✨ What's New (Enterprise Update v2.3.0)
-- **🔊 LiveSoko Senses**: Synthesized audio feedback for verified orders and unmatched payments.
-- **📊 Market Hero Dashboard**: Lifetime revenue, total orders, and AOV analytics on the History page.
-- **🛡️ Multi-Tenant 2.0**: Secure shop isolation with Owner/Manager/Seller role hierarchies.
-- **💰 Floating Cash System**: Robust "Catch-all" engine for unmatched M-Pesa payments.
-- **📱 LiveSoko Sync**: Dedicated Android app for background SMS verification.
+## 🏗️ Architecture
+- **Local-First**: Node.js backend + SQLite (no cloud DB dependency).
+- **Single Server**: Backend serves both the API and the built React frontend.
+- **LAN Access**: Automatically detects WiFi IP so phones on the same network can access the app.
+- **Public Order Page**: Buyers visit `/shop/<slug>` to place orders — no login required.
+- **Manual Orders**: Sellers can add orders directly via "Add Order Info" on the Live tab.
+
+## ✨ Current Version (v2.4.0 — Stability Release)
+- **🔧 FK Migration Fix**: Automatic repair of orders table foreign key corruption.
+- **📋 Clipboard Fallback**: Copy URL works on mobile HTTP (no HTTPS required).
+- **🗑️ Delete Order Fix**: Orders now remove from UI immediately on delete.
+- **💰 Agreed Price Field**: Buyers enter the seller-quoted price on the public order form.
+- **📝 User-Friendly Settings**: Removed legacy sections (Google Sheets, SMS Forwarder URL, broken APK download). Tutorial and FAQ rewritten for real users.
+- **🔗 Reliable Routing**: Public order page uses `/shop/:slug` (no more broken `/@` routes).
 
 ---
-Built by **SoftLOGICtech** 🛡️🚀🏆
-*Version 2.3.0 — "The Enterprise Grand Finale"*
+Built by **SoftLOGICtech** 
+*Version 2.4.0 — "Stability First"*

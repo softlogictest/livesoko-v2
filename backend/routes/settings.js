@@ -29,19 +29,17 @@ router.get('/', (req, res) => {
 // PATCH /api/settings — update shop configuration
 router.patch('/', [
   body('name').optional().trim().isLength({ max: 50 }).escape(),
-  body('sheet_url').optional().isURL().withMessage('Invalid Sheet URL')
 ], (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
   const db = getDb();
   const shopId = req.user.shop_id;
-  const { name, sheet_url, slug, color_scheme } = req.body;
+  const { name, slug, color_scheme } = req.body;
   const updates = [];
   const params = [];
 
   if (name !== undefined) { updates.push('name = ?'); params.push(name); }
-  if (sheet_url !== undefined) { updates.push('sheet_url = ?'); params.push(sheet_url); }
   
   if (slug !== undefined) {
     // Basic slug validation

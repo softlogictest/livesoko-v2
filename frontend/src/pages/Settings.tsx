@@ -125,7 +125,6 @@ export const Settings: React.FC = () => {
   const { state, dispatch, notify } = useAppContext();
   const [profile, setProfile] = useState<any>(null);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [sheetUrl, setSheetUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'config' | 'tutorial' | 'faq'>('config');
 
@@ -135,7 +134,6 @@ export const Settings: React.FC = () => {
       if (res.ok) {
         const data = await res.json();
         setProfile(data);
-        if (data.seller.sheet_url) setSheetUrl(data.seller.sheet_url);
       }
     } catch (e) {
       console.error(e);
@@ -148,20 +146,6 @@ export const Settings: React.FC = () => {
     fetchProfile();
   }, []);
 
-  const handleUpdateSheet = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await fetchWithAuth('/api/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sheet_url: sheetUrl })
-      });
-      notify('Google Sheet URL updated!', 'success');
-      fetchProfile();
-    } catch (e) { 
-      notify('Failed to update Sheet URL', 'error');
-    }
-  };
 
   const [newStaffEmail, setNewStaffEmail] = useState('');
   const [newStaffPass, setNewStaffPass] = useState('');
@@ -496,7 +480,7 @@ export const Settings: React.FC = () => {
               >
                 💬 GIVE FEEDBACK / SUGGESTIONS
               </button>
-              <p className="text-[9px] text-text-muted mt-4 italic">LiveSoko v2.2.0 • Made with ❤️ by SoftLOGIC</p>
+              <p className="text-[9px] text-text-muted mt-4 italic">LiveSoko v2.4.0 • Made with ❤️ by SoftLOGIC</p>
             </div>
 
 

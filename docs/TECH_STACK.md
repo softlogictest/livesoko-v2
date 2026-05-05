@@ -22,7 +22,7 @@ LiveSoko is built using a modern, lightweight, and local-first architecture desi
   - `express-validator`: Strict input sanitization.
 
 ## 4. Third-Party Integrations
-- **Order Intake**: [Google Forms](https://www.google.com/forms/about/) + [Google Apps Script](https://developers.google.com/apps-script). This allows sellers to use a familiar interface for data collection, which then pushes data directly to the LiveSoko API via a custom webhook.
+- **Order Intake**: **Native Public Shop Page**. Buyers visit `/shop/:slug` to place orders directly into the LiveSoko ecosystem. This eliminates the need for external tools like Google Forms or Apps Script and ensures real-time validation and instant dashboard updates.
 - **Hosting/Deployment**: [Railway](https://railway.app/). Chosen for its seamless GitHub integration and persistent volume support for the SQLite database.
 
 ## 5. PWA (Progressive Web App)

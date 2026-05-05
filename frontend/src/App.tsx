@@ -67,8 +67,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/dashboard/settings" element={<ProtectedRoute requireManager><Settings /></ProtectedRoute>} />
           <Route path="/dashboard/network" element={<ProtectedRoute requireManager><Network /></ProtectedRoute>} />
           <Route path="/billing" element={<Billing />} />
-          <Route path="/@:slug" element={<PublicOrderPage />} />
-          <Route path="/s/:slug" element={<PublicOrderPage />} />
+          <Route path="/shop/:slug" element={<PublicOrderPage />} />
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -96,8 +95,7 @@ const NavBar = () => {
   const location = useLocation();
   const isPublicPath = location.pathname === '/login' || 
                        location.pathname === '/404' || 
-                       location.pathname.startsWith('/@') || 
-                       location.pathname.startsWith('/s/');
+                       location.pathname.startsWith('/shop/');
 
   if (isPublicPath) return null;
 

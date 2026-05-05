@@ -15,15 +15,15 @@ We use **GitHub Actions** to build the APK so you don't need to install any heav
    ```
 2. **Go to GitHub**: Open your repository on GitHub.com.
 3. **Actions Tab**: Click the **Actions** tab at the top.
-4. **Select Workflow**: Click on **"Build LiveSoko Sync APK"** on the left sidebar.
+4. **Select Workflow**: Click on **"Build and Release Android APK"** on the left sidebar.
 5. **Download Artifact**:
    - Click on the most recent green (successful) run.
    - Scroll down to the **Artifacts** section.
    - Click **`livesoko-sync-apk`** to download the ZIP file.
-6. **Extract**: Unzip the file to get the `app-debug.apk`.
+6. **Extract**: Unzip the file to get the `livesoko-sync.apk`.
 
 ## 2. Install the App
-1. **Transfer to Phone**: Send the `app-debug.apk` to the M-Pesa phone (via WhatsApp, USB, or Telegram).
+1. **Transfer to Phone**: Send the `livesoko-sync.apk` to the M-Pesa phone (via WhatsApp, USB, or Telegram).
 2. **Open APK**: Tap the file on the phone to install.
 3. **Permission**: If Android warns about "Unknown Sources", tap **Settings** and toggle **"Allow from this source"**.
 4. **Install**: Complete the installation.

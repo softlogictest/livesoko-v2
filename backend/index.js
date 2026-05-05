@@ -126,7 +126,7 @@ app.use(express.static(frontendPath));
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', name: 'LiveSoko v2.2.0', mode: 'local' });
+  res.json({ status: 'ok', name: 'LiveSoko v2.4.0', mode: 'local' });
 });
 
 app.get('*', (req, res, next) => {
@@ -137,7 +137,7 @@ app.get('*', (req, res, next) => {
       // Frontend not built yet — show helpful message
       res.json({
         status: 'ok',
-        name: 'LiveSoko API v2.2.0',
+        name: 'LiveSoko API v2.4.0',
         message: 'Backend is running. Build the frontend with: cd frontend && npm run build'
       });
     }
@@ -169,7 +169,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   const ip = getLocalIP();
   console.log('');
   console.log('╔══════════════════════════════════════════════════╗');
-  console.log('║              LiveSoko v2.2.0 — LOCAL             ║');
+  console.log('║              LiveSoko v2.4.0 — LOCAL             ║');
   console.log('╠══════════════════════════════════════════════════╣');
   console.log(`║  On this PC:    http://localhost:${PORT}             ║`);
   console.log(`║  On WiFi/LAN:   http://${ip}:${PORT}       ║`);
@@ -184,7 +184,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Port ${PORT} in use, trying ${altPort}...`);
     app.listen(altPort, '0.0.0.0', () => {
       const ip = getLocalIP();
-      console.log(`LiveSoko v2.2.0 running at http://${ip}:${altPort}`);
+      console.log(`LiveSoko v2.4.0 running at http://${ip}:${altPort}`);
     });
   } else {
     throw err;

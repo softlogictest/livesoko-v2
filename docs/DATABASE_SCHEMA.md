@@ -64,18 +64,30 @@ erDiagram
 
     orders {
         TEXT id PK
-        TEXT session_id FK
+        TEXT session_id FK "-> sessions.id"
         TEXT shop_id FK "-> shops.id"
         TEXT buyer_name
         TEXT buyer_tiktok
         TEXT buyer_phone
+        TEXT delivery_location
+        TEXT coordinates
         TEXT item_name
         INT quantity
         REAL unit_price
-        REAL expected_amount
-        TEXT payment_type
-        TEXT status "PENDING | VERIFIED | FULFILLED | etc"
+        REAL expected_amount "GENERATED: quantity * unit_price"
+        TEXT payment_type "MPESA | COD"
+        TEXT buyer_mpesa_name
+        TEXT mpesa_sender_name
+        REAL mpesa_amount
+        TEXT mpesa_tx_code UK
+        TEXT mpesa_raw_sms
+        TEXT mpesa_received_at
+        TEXT status "PENDING | COD_PENDING | VERIFIED | FRAUD | REVIEW | FULFILLED"
+        TEXT status_reason
+        TEXT fulfilled_at
+        TEXT fulfilled_by FK "-> profiles.id"
         TEXT created_at
+        TEXT updated_at
     }
 
     sms_logs {
@@ -110,5 +122,6 @@ Every query that reads or writes `orders`, `sessions`, or `sms_logs` includes `W
 
 Migrations run automatically on startup in `database.js`. They use safe patterns:
 1. **Simple column additions**: `ALTER TABLE ... ADD COLUMN` (e.g., `buyer_mpesa_name`, `expires_at`).
-2. **Constraint changes**: CREATE new → COPY data → DROP old → RENAME (e.g., adding `COD_PENDING` status).
-3. **FK corruption repair**: `PRAGMA foreign_key_check()` → rebuild if corrupted.
+2. **Constraint changes (Phase 2)**: CREATE new → COPY data → DROP old → RENAME (e.g., adding `COD_PENDING` status, fixing sessions FK).
+3. **FK corruption repair (Phase 3)**: Detects `orders.shop_id` wrongly referencing `profiles(id)` instead of `shops(id)` and rebuilds with correct FK.
+4. **Detection**: Uses `PRAGMA foreign_key_list()` to check if FKs point to the correct tables before running the migration.

@@ -96,7 +96,7 @@ export const PublicOrderPage: React.FC = () => {
           </li>
           <li className="flex gap-3">
             <span className="bg-brand-primary/20 text-brand-primary w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">2</span>
-            <span>Send <strong>Ksh {formData.quantity * formData.unit_price}</strong> to the seller's number.</span>
+            <span>Send <strong>the agreed amount</strong> to the seller's M-Pesa number.</span>
           </li>
           <li className="flex gap-3">
             <span className="bg-brand-primary/20 text-brand-primary w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">3</span>
@@ -174,17 +174,19 @@ export const PublicOrderPage: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs text-text-secondary ml-1">Price (Ksh)</label>
+                  <label className="text-xs text-text-secondary ml-1">Agreed Price (Ksh)</label>
                   <input 
                     required
                     type="number"
-                    min="0"
+                    min="1"
+                    placeholder="e.g. 1500"
                     className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
-                    value={formData.unit_price}
-                    onChange={e => setFormData({...formData, unit_price: parseInt(e.target.value)})}
+                    value={formData.unit_price || ''}
+                    onChange={e => setFormData({...formData, unit_price: parseInt(e.target.value) || 0})}
                   />
                 </div>
               </div>
+              <p className="text-[10px] text-text-muted ml-1 -mt-2 italic">Enter the price the seller quoted on Live</p>
             </section>
 
             <section className="space-y-4 pt-4 border-t border-border-subtle">
@@ -240,14 +242,6 @@ export const PublicOrderPage: React.FC = () => {
             </section>
 
             <footer className="pt-6">
-              <div className="bg-brand-primary/5 p-4 rounded-2xl mb-6 border border-brand-primary/10">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-text-secondary text-sm">Total Amount</span>
-                  <span className="text-2xl font-bold text-brand-primary">Ksh {formData.quantity * formData.unit_price}</span>
-                </div>
-                <p className="text-[10px] text-text-muted text-center italic">Pay after clicking the button below</p>
-              </div>
-
               <button 
                 type="submit"
                 disabled={loading}

@@ -1,6 +1,6 @@
 # LiveSoko: API Reference 📡
 
-All endpoints for the LiveSoko backend. Base URL: `http://localhost:3000` (dev) or your Railway domain (prod).
+All endpoints for the LiveSoko backend. Base URL: `http://localhost:3000` (on the laptop) or `http://<wifi-ip>:3000` (on phone via LAN).
 
 ## Authentication
 
@@ -64,7 +64,7 @@ List orders for the authenticated seller's shop.
 ---
 
 ### `POST /api/orders`
-Create a new order. Can be called with auth token (manual entry) OR `webhook_token` in body (Google Form intake).
+Create a new order. Used for manual entry via the seller dashboard.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
@@ -77,7 +77,6 @@ Create a new order. Can be called with auth token (manual entry) OR `webhook_tok
 | delivery_location | string | ❌ | Defaults to "Not specified" |
 | payment_type | string | ❌ | "MPESA" (default) or "COD" |
 | buyer_mpesa_name | string | ❌ | Expected MPESA sender name |
-| webhook_token | string | ❌ | For unauthenticated form intake |
 
 **Response**: `201` with the created order object.
 
@@ -141,15 +140,39 @@ Update shop settings.
 | shop_name | string | Max 50 chars |
 | tiktok_handle | string | Max 30 chars |
 | mpesa_number | string | Max 15 chars |
-| sheet_url | string | Must be valid URL |
+| slug | string | Max 30 chars, lowercase alphanumeric + hyphens |
 
-### `POST /api/settings/handymen`
-Create a handyman (staff) account. 🔒 Seller role only.
+### `POST /api/settings/staff`
+Create a staff account (seller or manager). 🔒 Owner/Manager role only.
 
 | Field | Type | Required | Rules |
 |---|---|---|---|
 | email | string | ✅ | Valid email |
 | password | string | ✅ | 8+ chars |
+| role | string | ❌ | "seller" (default) or "manager" |
+
+---
+
+## Public Routes (`/api/public`) — No Auth Required
+
+### `GET /api/public/shop/:slug`
+Get public shop info by slug. Returns shop name, color scheme, and live status.
+
+**Response**: `{ id, name, slug, color_scheme, is_live }`
+
+### `POST /api/public/order`
+Submit a buyer order from the public order page.
+
+| Field | Type | Required |
+|---|---|---|
+| shop_id | string | ✅ |
+| buyer_name | string | ✅ |
+| buyer_phone | string | ✅ |
+| item_name | string | ✅ |
+| quantity | integer | ✅ (min 1) |
+| unit_price | number | ✅ (min 0) |
+| buyer_tiktok | string | ❌ |
+| delivery_location | string | ❌ |
 
 ---
 
@@ -183,7 +206,9 @@ Opens a Server-Sent Events stream for real-time order updates.
 | `connected` | `{ status: "ok" }` | On connection |
 | `order:new` | Full order object | New order created |
 | `order:updated` | Full order object | Order status changed |
-| `order:deleted` | `{ id }` | Order removed |
+| `order:deleted` | `{ id, shop_id }` | Order removed |
+| `payment:unmatched` | Payment object | M-Pesa received, no matching order |
+| `payment:linked` | `{ id }` | Unmatched payment manually linked |
 
 ---
 

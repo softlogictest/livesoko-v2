@@ -16,6 +16,7 @@ export const LiveFeed: React.FC = () => {
   const [dismissedStale, setDismissedStale] = useState(false);
   const [showUnmatchedModal, setShowUnmatchedModal] = useState(false);
   const [endedSessionId, setEndedSessionId] = useState<string | null>(null);
+  const [isSyncPaused, setIsSyncPaused] = useState(false);
 
   const isManagerOrOwner = state.activeShop?.role === 'owner' || state.activeShop?.role === 'manager' || state.user?.role === 'admin';
 
@@ -108,6 +109,35 @@ export const LiveFeed: React.FC = () => {
   }, [state.activeSession?.id, state.orders]);
   // ─────────────────────────────────────────────────────────────────────────
 
+  // ── Sync Pulse Check ──────────────────────────────────────────────────────
+  // Checks if the SMS Forwarder has checked in recently
+  useEffect(() => {
+    const checkPulse = async () => {
+      try {
+        const res = await fetchWithAuth('/api/settings/network');
+        if (res.ok) {
+          const data = await res.json();
+          const devices = data.devices || [];
+          if (devices.length === 0) {
+            setIsSyncPaused(false); // No device configured yet, don't nag
+            return;
+          }
+          
+          const latestSeen = Math.max(...devices.map((d: any) => new Date(d.last_seen_at.replace(' ', 'T') + 'Z').getTime()));
+          const TEN_MIN = 10 * 60 * 1000;
+          setIsSyncPaused(Date.now() - latestSeen > TEN_MIN);
+        }
+      } catch (e) {
+        console.error('Pulse check error:', e);
+      }
+    };
+
+    checkPulse();
+    const id = setInterval(checkPulse, 30_000); // Check every 30s
+    return () => clearInterval(id);
+  }, []);
+  // ─────────────────────────────────────────────────────────────────────────
+
 
   const handleStartSession = async () => {
     try {
@@ -131,7 +161,7 @@ export const LiveFeed: React.FC = () => {
 
   const handleManualOrder = async (data: { buyer_name: string; item_name: string; unit_price: string; quantity: string; delivery_location: string; buyer_phone: string; payment_type: 'MPESA' | 'COD'; buyer_mpesa_name?: string }) => {
     try {
-      await fetchWithAuth('/api/orders', {
+      const res = await fetchWithAuth('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -146,6 +176,13 @@ export const LiveFeed: React.FC = () => {
           buyer_mpesa_name: data.buyer_mpesa_name || undefined
         })
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Failed to create order' }));
+        alert(err.error || 'Failed to create order');
+        return;
+      }
+      const order = await res.json();
+      dispatch({ type: 'ADD_ORDER', payload: order });
       setShowManualModal(false);
     } catch (e) {
       console.error(e);
@@ -197,6 +234,26 @@ export const LiveFeed: React.FC = () => {
           <div className="relative z-10 bg-brand-primary text-black w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg group-hover:translate-x-1 transition-transform">
             →
           </div>
+        </div>
+      )}
+
+      {/* Sync Paused Alert */}
+      {isSyncPaused && (
+        <div className="mx-4 mt-3 flex items-center justify-between bg-status-fraud/10 border border-status-fraud/40 rounded-xl px-4 py-3 animate-pulse shadow-[0_0_20px_rgba(255,59,48,0.1)]">
+           <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-status-fraud/20 flex items-center justify-center text-lg">
+                📵
+              </div>
+              <div>
+                 <p className="text-status-fraud text-[10px] font-display font-bold uppercase tracking-widest leading-none mb-1">
+                   Connection Alert
+                 </p>
+                 <p className="text-white text-sm font-display font-bold">
+                   Live Sync Paused
+                 </p>
+                 <p className="text-text-muted text-[10px] font-body uppercase tracking-tight mt-0.5">Please check your phone's connection</p>
+              </div>
+           </div>
         </div>
       )}
 
