@@ -9,6 +9,7 @@ import { Sessions } from './pages/Sessions';
 import { Billing } from './pages/Billing';
 import { PublicOrderPage } from './pages/PublicOrderPage';
 import { Network } from './pages/Network';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { NotFound } from './pages/NotFound';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { fetchWithAuth, API } from './lib/api';
@@ -66,6 +67,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/dashboard/sessions" element={<ProtectedRoute requireManager><Sessions /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute requireManager><Settings /></ProtectedRoute>} />
           <Route path="/dashboard/network" element={<ProtectedRoute requireManager><Network /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/shop/:slug" element={<PublicOrderPage />} />
           <Route path="/404" element={<NotFound />} />
@@ -76,13 +78,18 @@ const AppRoutes: React.FC = () => {
   );
 };
 
-const ProtectedRoute = ({ children, requireManager }: { children: React.ReactNode, requireManager?: boolean }) => {
+const ProtectedRoute = ({ children, requireManager, requireAdmin }: { children: React.ReactNode, requireManager?: boolean, requireAdmin?: boolean }) => {
   const { state } = useAppContext();
   if (!state.user) return <Navigate to="/login" replace />;
-  if (!state.activeShop) return <Navigate to="/login" replace />;
+  
+  if (requireAdmin && state.user.role !== 'admin') {
+    return <Navigate to="/dashboard/live" replace />;
+  }
+
+  if (!state.activeShop && !requireAdmin) return <Navigate to="/login" replace />;
   
   if (requireManager) {
-    const role = state.activeShop.role;
+    const role = state.activeShop?.role;
     if (role !== 'owner' && role !== 'manager') {
       return <Navigate to="/dashboard/live" replace />;
     }

@@ -125,7 +125,7 @@ export const LiveFeed: React.FC = () => {
           
           const latestSeen = Math.max(...devices.map((d: any) => new Date(d.last_seen_at.replace(' ', 'T') + 'Z').getTime()));
           const TEN_MIN = 10 * 60 * 1000;
-          setIsSyncPaused(Date.now() - latestSeen > TEN_MIN);
+          setIsSyncPaused(!!state.activeSession && Date.now() - latestSeen > TEN_MIN);
         }
       } catch (e) {
         console.error('Pulse check error:', e);

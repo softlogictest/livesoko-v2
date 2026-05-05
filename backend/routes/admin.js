@@ -71,4 +71,26 @@ router.post('/payments', [
   }
 });
 
+// GET /api/admin/stats — Global health check for the developer
+router.get('/stats', (req, res) => {
+  const db = getDb();
+  try {
+    const shops = db.prepare('SELECT count(*) as count FROM shops').get().count;
+    const activeSessions = db.prepare("SELECT count(*) as count FROM sessions WHERE status = 'active'").get().count;
+    const totalOrders = db.prepare('SELECT count(*) as count FROM orders').get().count;
+    const recentOrders = db.prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 5").all();
+    const devices = db.prepare('SELECT count(*) as count FROM devices').get().count;
+    
+    res.json({
+      shops,
+      activeSessions,
+      totalOrders,
+      devices,
+      recentOrders
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;
