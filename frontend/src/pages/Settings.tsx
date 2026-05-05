@@ -364,7 +364,7 @@ export const Settings: React.FC = () => {
               </p>
 
               <button 
-                onClick={() => window.location.href = 'https://github.com/softlogictest/livesoko-v2/releases/latest/download/livesoko-sync.apk'}
+                onClick={() => window.location.href = '/livesoko-sync.apk'}
                 className="w-full bg-brand-primary/20 text-brand-primary border border-brand-primary py-3 rounded-lg font-bold text-xs uppercase tracking-widest mb-6 hover:bg-brand-primary hover:text-black transition-colors flex items-center justify-center gap-2"
               >
                 ⬇️ DOWNLOAD COMPANION APP
