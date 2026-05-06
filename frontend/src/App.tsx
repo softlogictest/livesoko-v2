@@ -9,7 +9,6 @@ import { Sessions } from './pages/Sessions';
 import { Billing } from './pages/Billing';
 import { PublicOrderPage } from './pages/PublicOrderPage';
 import { Network } from './pages/Network';
-import { AdminDashboard } from './pages/AdminDashboard';
 import { SuperInterface } from './pages/SuperInterface';
 import { NotFound } from './pages/NotFound';
 import { AppProvider, useAppContext } from './context/AppContext';
@@ -60,8 +59,12 @@ const AppRoutes: React.FC = () => {
 
   if (loading) return <div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="w-8 h-8 rounded-full bg-brand-primary animate-ping"></div></div>;
 
+  if (isMainframe) {
+    return <SuperInterface />;
+  }
+
   return (
-      <div className={`app-container relative min-h-screen bg-bg-base ${isMainframe ? 'w-full' : 'max-w-md mx-auto shadow-2xl pb-16'}`}>
+      <div className="app-container relative min-h-screen bg-bg-base max-w-md mx-auto shadow-2xl pb-16">
         <Routes>
           <Route path="/" element={<Navigate to={state.user ? "/dashboard/live" : "/login"} replace />} />
           <Route path="/login" element={<Login />} />
@@ -71,7 +74,6 @@ const AppRoutes: React.FC = () => {
           <Route path="/dashboard/sessions" element={<ProtectedRoute requireManager><Sessions /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute requireManager><Settings /></ProtectedRoute>} />
           <Route path="/dashboard/network" element={<ProtectedRoute requireManager><Network /></ProtectedRoute>} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/mainframe" element={<ProtectedRoute requireAdmin><SuperInterface /></ProtectedRoute>} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/shop/:slug" element={<PublicOrderPage />} />
