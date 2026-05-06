@@ -5,7 +5,9 @@ const { body, validationResult } = require('express-validator');
 
 // Basic manual superadmin check
 const requireSuperAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
+  const adminEmail = process.env.DEFAULT_SELLER_EMAIL || 'admin@livesoko.local';
+  if (req.user.role !== 'admin' || req.user.email !== adminEmail) {
+    console.warn(`[SECURITY] Unauthorized SuperAdmin access attempt by ${req.user.email}`);
     return res.status(403).json({ error: 'SuperAdmin only.' });
   }
   next();
@@ -78,6 +80,7 @@ router.get('/stats', (req, res) => {
     const shops = db.prepare('SELECT count(*) as count FROM shops').get().count;
     const activeSessions = db.prepare("SELECT count(*) as count FROM sessions WHERE status = 'active'").get().count;
     const totalOrders = db.prepare('SELECT count(*) as count FROM orders').get().count;
+    const totalUsers = db.prepare('SELECT count(*) as count FROM profiles').get().count;
     const recentOrders = db.prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 5").all();
     const devices = db.prepare('SELECT count(*) as count FROM devices').get().count;
     
@@ -85,12 +88,35 @@ router.get('/stats', (req, res) => {
       shops,
       activeSessions,
       totalOrders,
+      totalUsers,
       devices,
       recentOrders
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// GET /api/admin/logs — Fetch recent server logs
+router.get('/logs', (req, res) => {
+  if (global.logBuffer) {
+    res.json(global.logBuffer.getLogs());
+  } else {
+    res.json([]);
+  }
+});
+
+// GET /api/admin/system — Fetch hardware metrics
+router.get('/system', (req, res) => {
+  const os = require('os');
+  res.json({
+    platform: os.platform(),
+    uptime: os.uptime(),
+    totalMemory: os.totalmem(),
+    freeMemory: os.freemem(),
+    loadAvg: os.loadavg(),
+    dbSize: 0 // Placeholder for db size if needed
+  });
 });
 
 module.exports = router;

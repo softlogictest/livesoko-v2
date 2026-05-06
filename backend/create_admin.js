@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const db = init();
 
 const email = process.env.DEFAULT_SELLER_EMAIL || 'admin@livesoko.local';
-const password = process.env.DEFAULT_SELLER_PASS || 'LiveSoko#2026!';
+const password = process.env.DEFAULT_SELLER_PASS || 'King@tessy2123';
 const hash = bcrypt.hashSync(password, 12);
 const id = crypto.randomUUID();
 
@@ -18,7 +18,7 @@ try {
   console.log('Super Admin account created explicitly.');
   console.log(`Email: ${email}`);
   console.log(`Password: ${password}`);
-} catch(e) {
+} catch (e) {
   if (e.message.includes('UNIQUE')) {
     console.log('Super Admin already exists. No action needed.');
     console.log(`Email is likely: ${email}`);

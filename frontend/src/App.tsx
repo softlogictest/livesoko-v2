@@ -10,6 +10,7 @@ import { Billing } from './pages/Billing';
 import { PublicOrderPage } from './pages/PublicOrderPage';
 import { Network } from './pages/Network';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { SuperInterface } from './pages/SuperInterface';
 import { NotFound } from './pages/NotFound';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { MaintenanceModal } from './components/MaintenanceModal';
@@ -69,6 +70,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/dashboard/settings" element={<ProtectedRoute requireManager><Settings /></ProtectedRoute>} />
           <Route path="/dashboard/network" element={<ProtectedRoute requireManager><Network /></ProtectedRoute>} />
           <Route path="/admin/dashboard" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/mainframe" element={<ProtectedRoute requireAdmin><SuperInterface /></ProtectedRoute>} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/shop/:slug" element={<PublicOrderPage />} />
           <Route path="/404" element={<NotFound />} />

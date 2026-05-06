@@ -11,6 +11,37 @@ const adminRouter = require('./routes/admin');
 const ordersRouter = require('./routes/orders');
 const paymentsRouter = require('./routes/payments');
 const sessionsRouter = require('./routes/sessions');
+const os = require('os');
+
+// Log Capture for Super Interface
+class LogBuffer {
+  constructor(limit = 200) {
+    this.logs = [];
+    this.limit = limit;
+  }
+  add(type, message) {
+    const log = {
+      timestamp: new Date().toISOString(),
+      type,
+      message: typeof message === 'string' ? message : JSON.stringify(message)
+    };
+    this.logs.push(log);
+    if (this.logs.length > this.limit) this.logs.shift();
+  }
+  getLogs() { return this.logs; }
+}
+const logBuffer = new LogBuffer();
+const originalLog = console.log;
+const originalError = console.error;
+console.log = (...args) => {
+  logBuffer.add('info', args.join(' '));
+  originalLog.apply(console, args);
+};
+console.error = (...args) => {
+  logBuffer.add('error', args.join(' '));
+  originalError.apply(console, args);
+};
+global.logBuffer = logBuffer; // Expose to routers
 
 // Initialize database FIRST (creates tables + default account)
 const db = initDb();
@@ -74,8 +105,8 @@ app.use('/api/orders/webhook', webhookLimiter);
 app.use('/api/sms/', smsLimiter);
 
 // CORS Lockdown
-const domain = process.env.RAILWAY_PUBLIC_DOMAIN 
-  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
+const domain = process.env.RAILWAY_PUBLIC_DOMAIN
+  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
   : (process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : '*');
 
 console.log(`[AUTH] CORS allowing origin: ${domain}`);
