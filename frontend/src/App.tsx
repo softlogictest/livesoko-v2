@@ -21,6 +21,8 @@ export { API };
 const AppRoutes: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const isMainframe = location.pathname === '/admin/mainframe';
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -59,7 +61,7 @@ const AppRoutes: React.FC = () => {
   if (loading) return <div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="w-8 h-8 rounded-full bg-brand-primary animate-ping"></div></div>;
 
   return (
-      <div className="app-container max-w-md mx-auto relative min-h-screen bg-bg-base shadow-2xl pb-16">
+      <div className={`app-container relative min-h-screen bg-bg-base ${isMainframe ? 'w-full' : 'max-w-md mx-auto shadow-2xl pb-16'}`}>
         <Routes>
           <Route path="/" element={<Navigate to={state.user ? "/dashboard/live" : "/login"} replace />} />
           <Route path="/login" element={<Login />} />
@@ -110,6 +112,7 @@ const NavBar = () => {
   const location = useLocation();
   const isPublicPath = location.pathname === '/login' || 
                        location.pathname === '/404' || 
+                       location.pathname === '/admin/mainframe' ||
                        location.pathname.startsWith('/shop/');
 
   if (isPublicPath) return null;
