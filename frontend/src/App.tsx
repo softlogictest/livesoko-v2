@@ -22,7 +22,7 @@ const AppRoutes: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const urlParams = new URLSearchParams(location.search);
-  const hasKey = urlParams.get('key') === 'LS-DEV-GATEWAY-2026';
+  const hasKey = urlParams.has('key');
   const isMainframe = location.pathname.startsWith('/admin/mainframe');
 
   if (loading && !hasKey) return <div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="w-8 h-8 rounded-full bg-brand-primary animate-ping"></div></div>;

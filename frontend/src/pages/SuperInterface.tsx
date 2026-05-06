@@ -8,6 +8,7 @@ export const SuperInterface: React.FC = () => {
   const [logs, setLogs] = useState<any[]>([]);
   const [system, setSystem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [unauthorized, setUnauthorized] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,6 +23,11 @@ export const SuperInterface: React.FC = () => {
           fetchWithAuth('/api/admin/logs', { headers }),
           fetchWithAuth('/api/admin/system', { headers })
         ]);
+
+        if (statsRes.status === 401 || statsRes.status === 403) {
+          setUnauthorized(true);
+          return;
+        }
 
         if (statsRes.ok) setStats(await statsRes.json());
         if (logsRes.ok) setLogs(await logsRes.json());
@@ -41,6 +47,22 @@ export const SuperInterface: React.FC = () => {
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
+
+  if (unauthorized) return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center font-mono text-red-500 p-6 text-center">
+      <div className="text-6xl mb-6">⚠️</div>
+      <div className="text-2xl font-black mb-2 uppercase tracking-tighter">Access Denied // Invalid Key</div>
+      <div className="text-[10px] text-zinc-500 uppercase tracking-widest max-w-xs">
+        Your credentials do not match the mainframe security protocol. This attempt has been logged.
+      </div>
+      <button 
+        onClick={() => window.location.href = '/login'}
+        className="mt-8 border border-red-500/30 text-red-500 px-6 py-2 rounded text-xs font-bold hover:bg-red-500/10 transition-colors uppercase"
+      >
+        Return to Safety
+      </button>
+    </div>
+  );
 
   if (loading) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center font-mono text-brand-primary">
