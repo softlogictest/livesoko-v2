@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { ConfirmModal } from './ConfirmModal';
-import { API } from '../App';
+import { fetchWithAuth } from '../lib/api';
 
 // SQLite stores datetimes as "YYYY-MM-DD HH:MM:SS" without timezone info (UTC).
 // JavaScript's Date constructor treats bare strings as LOCAL time, causing a 3h offset in EAT.
@@ -29,9 +29,8 @@ export const SessionHeader: React.FC<{ onSessionEnded?: (sessionId: string) => v
     if (!activeSession) return;
     const sessionId = activeSession.id;
     try {
-      await fetch(`${API}/api/sessions/${sessionId}/end`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${user?.token}` }
+      await fetchWithAuth(`/api/sessions/${sessionId}/end`, {
+        method: 'PATCH'
       });
       dispatch({ type: 'SET_ACTIVE_SESSION', payload: null });
       dispatch({ type: 'SET_ORDERS', payload: [] });
