@@ -46,8 +46,22 @@ router.post('/order', [
   const db = getDb();
 
   // Find active session for this shop
-  const session = db.prepare('SELECT id FROM sessions WHERE shop_id = ? AND status = ?').get(shop_id, 'active');
-  if (!session) return res.status(400).json({ error: 'The seller currently has no active session. Please wait until they are live!' });
+  let session = db.prepare('SELECT id FROM sessions WHERE shop_id = ? AND status = ?').get(shop_id, 'active');
+  let isOffline = false;
+  
+  if (!session) {
+    // Look for Offline Storefront session
+    session = db.prepare('SELECT id FROM sessions WHERE shop_id = ? AND title = ?').get(shop_id, 'Offline Storefront');
+    if (!session) {
+      const sessionId = crypto.randomUUID();
+      db.prepare(`
+        INSERT INTO sessions (id, shop_id, title, status)
+        VALUES (?, ?, 'Offline Storefront', 'ended')
+      `).run(sessionId, shop_id);
+      session = { id: sessionId };
+    }
+    isOffline = true;
+  }
 
   // Normalize phone
   let phone = (buyer_phone || '').replace(/[\s\-()]/g, '');
@@ -58,7 +72,12 @@ router.post('/order', [
   const id = crypto.randomUUID();
 
   const pType = payment_type === 'COD' ? 'COD' : 'MPESA';
-  const initialStatus = pType === 'COD' ? 'COD_PENDING' : 'PENDING';
+  let initialStatus;
+  if (isOffline) {
+    initialStatus = 'OFFLINE_REVIEW';
+  } else {
+    initialStatus = pType === 'COD' ? 'COD_PENDING' : 'PENDING';
+  }
 
   try {
     db.prepare(`
@@ -103,6 +122,13 @@ router.post('/enquiry', [
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
   const { shop_id, buyer_name, buyer_contact, message } = req.body;
+
+  let phone = (buyer_contact || '').replace(/[\s\-()]/g, '');
+  if (phone.startsWith('07') || phone.startsWith('01')) phone = '+254' + phone.substring(1);
+  else if (phone.startsWith('254')) phone = '+' + phone;
+  else if (!phone.startsWith('+') && phone.match(/^[0-9]+$/)) phone = '+254' + phone;
+  else phone = buyer_contact; // fallback if it's a tiktok handle or email
+
   const id = crypto.randomUUID();
   const db = getDb();
 
@@ -110,7 +136,7 @@ router.post('/enquiry', [
     db.prepare(`
       INSERT INTO enquiries (id, shop_id, buyer_name, buyer_contact, message, status)
       VALUES (?, ?, ?, ?, ?, 'PENDING')
-    `).run(id, shop_id, buyer_name, buyer_contact, message);
+    `).run(id, shop_id, buyer_name, phone, message);
 
     const enquiry = db.prepare('SELECT * FROM enquiries WHERE id = ?').get(id);
     broadcast('enquiry:new', enquiry);

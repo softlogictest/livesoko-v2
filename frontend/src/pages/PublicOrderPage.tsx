@@ -9,6 +9,7 @@ export const PublicOrderPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
+  const [offlineMode, setOfflineMode] = useState<'INQUIRE' | 'ORDER'>('INQUIRE');
   
   const [enquiryData, setEnquiryData] = useState({
     buyer_name: '',
@@ -204,57 +205,87 @@ export const PublicOrderPage: React.FC = () => {
                 😴
               </div>
               <h2 className="text-2xl font-bold text-text-primary mb-2">Store is Offline</h2>
-              <p className="text-text-secondary text-sm">The seller is not currently live, but you can leave a message or inquiry below. They will get back to you!</p>
+              <p className="text-text-secondary text-sm">The seller is not currently live, but you can leave a message or place an order for them to review.</p>
             </div>
 
-            <form onSubmit={handleEnquirySubmit} className="space-y-5 bg-bg-surface border border-border-subtle p-6 rounded-2xl shadow-xl">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Your Name</label>
-                <input 
-                  required
-                  type="text"
-                  placeholder="e.g. Jane Doe"
-                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
-                  value={enquiryData.buyer_name}
-                  onChange={e => setEnquiryData({...enquiryData, buyer_name: e.target.value})}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Contact Info</label>
-                <input 
-                  required
-                  type="text"
-                  placeholder="Phone number or TikTok handle"
-                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
-                  value={enquiryData.buyer_contact}
-                  onChange={e => setEnquiryData({...enquiryData, buyer_contact: e.target.value})}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Message</label>
-                <textarea
-                  required
-                  rows={4}
-                  placeholder="What would you like to ask or order?"
-                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all resize-none"
-                  value={enquiryData.message}
-                  onChange={e => setEnquiryData({...enquiryData, message: e.target.value})}
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={loading}
-                className="w-full bg-brand-primary text-black font-bold py-4 rounded-xl mt-4 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(0,255,136,0.2)]"
+            {/* Offline Mode Toggle */}
+            <div className="flex gap-2 mb-6">
+              <button
+                type="button"
+                onClick={() => setOfflineMode('INQUIRE')}
+                className={`flex-1 py-3 rounded-xl text-sm font-display font-bold uppercase tracking-widest border transition-colors ${
+                  offlineMode === 'INQUIRE'
+                    ? 'bg-brand-primary text-black border-brand-primary shadow-[0_0_15px_rgba(0,255,136,0.2)]'
+                    : 'bg-bg-surface text-text-muted border-border-subtle hover:text-text-secondary'
+                }`}
               >
-                {loading ? 'Sending...' : 'SEND INQUIRY'}
+                📬 INQUIRE
               </button>
-            </form>
+              <button
+                type="button"
+                onClick={() => setOfflineMode('ORDER')}
+                className={`flex-1 py-3 rounded-xl text-sm font-display font-bold uppercase tracking-widest border transition-colors ${
+                  offlineMode === 'ORDER'
+                    ? 'bg-brand-primary text-black border-brand-primary shadow-[0_0_15px_rgba(0,255,136,0.2)]'
+                    : 'bg-bg-surface text-text-muted border-border-subtle hover:text-text-secondary'
+                }`}
+              >
+                🛍️ BUY NOW
+              </button>
+            </div>
+
+            {offlineMode === 'INQUIRE' ? (
+              <form onSubmit={handleEnquirySubmit} className="space-y-5 bg-bg-surface border border-border-subtle p-6 rounded-2xl shadow-xl animate-fade-in">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Your Name</label>
+                  <input 
+                    required
+                    type="text"
+                    placeholder="e.g. Jane Doe"
+                    className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                    value={enquiryData.buyer_name}
+                    onChange={e => setEnquiryData({...enquiryData, buyer_name: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Contact Info</label>
+                  <input 
+                    required
+                    type="text"
+                    placeholder="Phone number or TikTok handle"
+                    className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                    value={enquiryData.buyer_contact}
+                    onChange={e => setEnquiryData({...enquiryData, buyer_contact: e.target.value})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Message</label>
+                  <textarea
+                    required
+                    rows={4}
+                    placeholder="What would you like to ask or order?"
+                    className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all resize-none"
+                    value={enquiryData.message}
+                    onChange={e => setEnquiryData({...enquiryData, message: e.target.value})}
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-brand-primary text-black font-bold py-4 rounded-xl mt-4 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(0,255,136,0.2)]"
+                >
+                  {loading ? 'Sending...' : 'SEND INQUIRY'}
+                </button>
+              </form>
+            ) : null}
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+        ) : null}
+
+        {(shop?.is_live || offlineMode === 'ORDER') && (
+          <form onSubmit={handleSubmit} className={`space-y-6 ${!shop?.is_live ? 'animate-fade-in' : ''}`}>
             {/* Payment type toggle */}
             <div className="flex gap-2">
               <button

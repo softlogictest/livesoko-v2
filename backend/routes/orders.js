@@ -186,6 +186,27 @@ router.post('/:id/verify', (req, res) => {
   res.json(updated);
 });
 
+// POST /api/orders/:id/accept_offline — accept an offline order and push to dispatch
+router.post('/:id/accept_offline', (req, res) => {
+  const db = getDb();
+  const order = db.prepare('SELECT * FROM orders WHERE id = ? AND shop_id = ?')
+    .get(req.params.id, req.user.shop_id);
+    
+  if (!order) return res.status(404).json({ error: 'Order not found or unauthorized' });
+  if (order.status !== 'OFFLINE_REVIEW') return res.status(400).json({ error: 'Only OFFLINE_REVIEW orders can be accepted this way' });
+
+  // If M-Pesa, it becomes VERIFIED. If COD, it becomes COD_PENDING.
+  const nextStatus = order.payment_type === 'COD' ? 'COD_PENDING' : 'VERIFIED';
+
+  db.prepare(`
+    UPDATE orders SET status = ?, status_reason = 'Accepted from Offline Storefront', updated_at = datetime(?) WHERE id = ? AND shop_id = ?
+  `).run(nextStatus, new Date().toISOString(), req.params.id, req.user.shop_id);
+
+  const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
+  broadcast('order:updated', updated);
+  res.json(updated);
+});
+
 // PATCH /api/orders/:id — update order details
 router.patch('/:id', (req, res) => {
   const { buyer_name, buyer_phone, delivery_location, item_name, unit_price, product_specifics } = req.body;
