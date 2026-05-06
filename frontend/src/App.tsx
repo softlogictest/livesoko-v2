@@ -21,7 +21,16 @@ const AppRoutes: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-  const isMainframe = location.pathname === '/admin/mainframe';
+  const urlParams = new URLSearchParams(location.search);
+  const hasKey = urlParams.get('key') === 'LS-DEV-GATEWAY-2026';
+  const isMainframe = location.pathname.startsWith('/admin/mainframe');
+
+  if (loading && !hasKey) return <div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="w-8 h-8 rounded-full bg-brand-primary animate-ping"></div></div>;
+
+  // --- TRUE SEPARATION: Mainframe Mode (with explicit key or auth) ---
+  if (isMainframe && (hasKey || state.user?.role === 'admin')) {
+    return <SuperInterface />;
+  }
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -56,12 +65,6 @@ const AppRoutes: React.FC = () => {
       setLoading(false);
     }
   }, [dispatch]);
-
-  if (loading) return <div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="w-8 h-8 rounded-full bg-brand-primary animate-ping"></div></div>;
-
-  if (isMainframe) {
-    return <SuperInterface />;
-  }
 
   return (
       <div className="app-container relative min-h-screen bg-bg-base max-w-md mx-auto shadow-2xl pb-16">
