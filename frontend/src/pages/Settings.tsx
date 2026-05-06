@@ -196,9 +196,7 @@ export const Settings: React.FC = () => {
 
   if (loading) return <div className="p-8 text-center text-text-muted">Loading...</div>;
 
-  const currentIp = window.location.hostname;
-  const currentPort = window.location.port || '3000';
-  const webhookUrl = `http://${currentIp}:${currentPort}/api/sms/${profile?.seller.webhook_token}`;
+  const webhookUrl = `${window.location.origin}/api/sms/${profile?.seller.webhook_token}`;
 
   return (
     <div className="bg-bg-base min-h-screen text-text-primary pb-24">
