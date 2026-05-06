@@ -1,6 +1,6 @@
 {
   "name": "livesoko",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "LiveSoko — Local-first live commerce for social sellers",
   "scripts": {
     "build": "cd backend && npm install && cd ../frontend && npm install && npm run build && rm -rf ../backend/public && cp -r dist ../backend/public",

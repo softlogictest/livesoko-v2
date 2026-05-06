@@ -35,14 +35,14 @@ function init() {
   let profileCols;
   try {
     profileCols = db.prepare(`PRAGMA table_info(profiles)`).all().map(c => c.name);
-  } catch(e) {
+  } catch (e) {
     profileCols = [];
   }
 
   if (profileCols.length > 0 && !profileCols.includes('enterprise_name')) {
     console.log('[DB] Migrating to Enterprise/Shop model...');
     db.pragma('foreign_keys = OFF');
-    
+
     // 1. Rebuild Profiles
     db.exec(`
       DROP TABLE IF EXISTS profiles_new;
@@ -132,7 +132,7 @@ function init() {
     if (orderCols.includes('seller_id')) {
       db.exec("DROP INDEX IF EXISTS idx_orders_seller_id; ALTER TABLE orders RENAME COLUMN seller_id TO shop_id; CREATE INDEX IF NOT EXISTS idx_orders_shop_id ON orders(shop_id);");
     }
-    
+
     const sessionCols = db.prepare("PRAGMA table_info(sessions)").all().map(c => c.name);
     if (sessionCols.includes('seller_id')) {
       db.exec("DROP INDEX IF EXISTS idx_sessions_seller_status; ALTER TABLE sessions RENAME COLUMN seller_id TO shop_id; CREATE INDEX IF NOT EXISTS idx_sessions_shop_status ON sessions(shop_id, status);");
@@ -147,7 +147,7 @@ function init() {
       CREATE INDEX IF NOT EXISTS idx_shops_owner ON shops(owner_id);
       CREATE INDEX IF NOT EXISTS idx_shop_users_user ON shop_users(user_id);
     `);
-    
+
     db.pragma('foreign_keys = ON');
     console.log('[DB] Enterprise migration complete.');
   }
@@ -156,12 +156,12 @@ function init() {
   let badSessionFk = false;
   try {
     badSessionFk = db.prepare("PRAGMA foreign_key_list(sessions)").all().some(fk => fk.from === 'shop_id' && fk.table === 'profiles');
-  } catch(e) {}
-  
+  } catch (e) { }
+
   if (badSessionFk) {
     console.log('[DB] Fixing bad foreign keys for sessions/orders/sms_logs...');
     db.pragma('foreign_keys = OFF');
-    
+
     // Fix sessions
     db.exec(`
       CREATE TABLE sessions_new (
@@ -243,12 +243,12 @@ function init() {
   let badOrderFk = false;
   try {
     badOrderFk = db.prepare("PRAGMA foreign_key_list(orders)").all().some(fk => fk.from === 'shop_id' && fk.table === 'profiles');
-  } catch(e) {}
+  } catch (e) { }
 
   if (badOrderFk) {
     console.log('[DB] Fixing orders table FK (shop_id -> shops instead of profiles)...');
     db.pragma('foreign_keys = OFF');
-    
+
     db.exec(`
       CREATE TABLE orders_fix (
         id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
@@ -448,9 +448,9 @@ function init() {
   const hasPaymentType = !!orderCols.find(c => c.name === 'payment_type');
   let hasCodPending = false;
   try {
-     const tableSQL = db.prepare(`SELECT sql FROM sqlite_master WHERE type='table' AND name='orders'`).get();
-     hasCodPending = tableSQL && tableSQL.sql.includes('COD_PENDING');
-  } catch(e) {}
+    const tableSQL = db.prepare(`SELECT sql FROM sqlite_master WHERE type='table' AND name='orders'`).get();
+    hasCodPending = tableSQL && tableSQL.sql.includes('COD_PENDING');
+  } catch (e) { }
 
   if (!hasPaymentType || !hasCodPending) {
     console.log('[DB] Migrating orders table (payment_type)...');
@@ -564,15 +564,15 @@ function init() {
     // Backfill slugs for existing shops
     const shops = db.prepare('SELECT id, name FROM shops WHERE slug IS NULL').all();
     const updateSlug = db.prepare('UPDATE shops SET slug = ? WHERE id = ?');
-    
+
     shops.forEach(s => {
       let slug = s.name.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
-      
+
       // Fallback if name is empty or weird
       if (!slug) slug = s.id.substring(0, 8);
-      
+
       // Handle potential collisions (rare in backfill but safe)
       let finalSlug = slug;
       let counter = 1;
@@ -580,18 +580,44 @@ function init() {
         finalSlug = `${slug}-${counter}`;
         counter++;
       }
-      
+
       updateSlug.run(finalSlug, s.id);
     });
     console.log(`[DB] Migrated ${shops.length} shops with fresh slugs.`);
   }
+
+  // --- MIGRATION: v2.5.0 — Email verification, password reset, device fingerprint ---
+  // Each migration is wrapped in try/catch so it silently no-ops on already-migrated DBs.
+  const v250migrations = [
+    { col: 'is_email_verified', sql: `ALTER TABLE profiles ADD COLUMN is_email_verified INTEGER NOT NULL DEFAULT 0` },
+    { col: 'email_verification_token', sql: `ALTER TABLE profiles ADD COLUMN email_verification_token TEXT` },
+    { col: 'reset_password_token', sql: `ALTER TABLE profiles ADD COLUMN reset_password_token TEXT` },
+    { col: 'reset_password_expires', sql: `ALTER TABLE profiles ADD COLUMN reset_password_expires TEXT` },
+    { col: 'registered_device_id', sql: `ALTER TABLE profiles ADD COLUMN registered_device_id TEXT` },
+  ];
+  const currentProfileCols = db.prepare(`PRAGMA table_info(profiles)`).all().map(c => c.name);
+  for (const m of v250migrations) {
+    if (!currentProfileCols.includes(m.col)) {
+      try {
+        db.exec(m.sql);
+        console.log(`[DB] v2.5.0 migration: added profiles.${m.col}`);
+      } catch (e) {
+        console.warn(`[DB] v2.5.0 migration skip (${m.col}):`, e.message);
+      }
+    }
+  }
+
+  // Ensure the admin account is always pre-verified (it doesn't go through email flow)
+  try {
+    db.exec(`UPDATE profiles SET is_email_verified = 1 WHERE role = 'admin'`);
+  } catch (e) { }
 
   // Create default admin account on first run
   const existing = db.prepare('SELECT id FROM profiles LIMIT 1').get();
   if (!existing) {
     const defaultEmail = process.env.DEFAULT_SELLER_EMAIL || 'admin@livesoko.local';
     const defaultPass = process.env.DEFAULT_SELLER_PASS || 'LiveSoko#2026!'; // Strong default
-    const hash = bcrypt.hashSync(defaultPass, 12); 
+    const hash = bcrypt.hashSync(defaultPass, 12);
     const ownerId = crypto.randomUUID();
     const shopId = crypto.randomUUID();
     const token = 'tok_' + crypto.randomBytes(6).toString('hex');

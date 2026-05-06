@@ -77,12 +77,19 @@ const loginLimiter = rateLimit({
   message: { error: 'Too many login attempts. Please wait 15 minutes.' }
 });
 
-// Registration rate limiter disabled during development/testing
-// const registerLimiter = rateLimit({
-//   windowMs: 60 * 60 * 1000,
-//   max: 100,
-//   message: { error: 'Too many accounts created. Please wait 1 hour.' }
-// });
+// v2.5.0: Tight limiter for email-sending endpoints (protects Resend free tier)
+const emailLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour window
+  max: 5,
+  message: { error: 'Too many requests. Please wait an hour before trying again.' }
+});
+
+// v2.5.0: Registration limiter — 3 accounts per IP per day
+const registerLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 3,
+  message: { error: 'Too many accounts created from this device. Please try again tomorrow.' }
+});
 
 // Security Pillar 5: Webhook & SMS Throttling (Protect DB from floods)
 const webhookLimiter = rateLimit({
@@ -99,7 +106,9 @@ const smsLimiter = rateLimit({
 
 app.use('/api/', limiter);
 app.use('/api/auth/login', loginLimiter);
-// app.use('/api/auth/register', registerLimiter); // Disabled during testing
+app.use('/api/auth/register', registerLimiter);
+app.use('/api/auth/forgot-password', emailLimiter);
+app.use('/api/auth/resend-verification', emailLimiter);
 app.use('/api/orders/webhook', webhookLimiter);
 app.use('/api/sms/', smsLimiter);
 
@@ -156,7 +165,7 @@ app.use(express.static(frontendPath));
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', name: 'LiveSoko v2.4.0', mode: 'local' });
+  res.json({ status: 'ok', name: 'LiveSoko v2.5.0', mode: 'local' });
 });
 
 app.get('*', (req, res, next) => {
@@ -199,7 +208,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   const ip = getLocalIP();
   console.log('');
   console.log('╔══════════════════════════════════════════════════╗');
-  console.log('║              LiveSoko v2.4.0 — LOCAL             ║');
+  console.log('║              LiveSoko v2.5.0 — LOCAL             ║');
   console.log('╠══════════════════════════════════════════════════╣');
   console.log(`║  On this PC:    http://localhost:${PORT}             ║`);
   console.log(`║  On WiFi/LAN:   http://${ip}:${PORT}       ║`);

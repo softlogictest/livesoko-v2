@@ -11,6 +11,7 @@ import { PublicOrderPage } from './pages/PublicOrderPage';
 import { Network } from './pages/Network';
 import { SuperInterface } from './pages/SuperInterface';
 import { NotFound } from './pages/NotFound';
+import { VerifyEmailPage, ResetPasswordPage } from './pages/AuthFlow';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { MaintenanceModal } from './components/MaintenanceModal';
 import { fetchWithAuth, API } from './lib/api';
@@ -25,13 +26,7 @@ const AppRoutes: React.FC = () => {
   const hasKey = urlParams.has('key');
   const isMainframe = location.pathname.startsWith('/admin/mainframe');
 
-  if (loading && !hasKey) return <div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="w-8 h-8 rounded-full bg-brand-primary animate-ping"></div></div>;
-
-  // --- TRUE SEPARATION: Mainframe Mode (with explicit key or auth) ---
-  if (isMainframe && (hasKey || state.user?.role === 'admin')) {
-    return <SuperInterface />;
-  }
-
+  // ALL hooks must be declared before any conditional returns (React Rules of Hooks)
   useEffect(() => {
     const handler = (e: any) => {
       e.preventDefault();
@@ -42,7 +37,6 @@ const AppRoutes: React.FC = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // Check for existing auth token in localStorage
     const token = localStorage.getItem('livesoko_token');
     if (token) {
       fetchWithAuth('/api/auth/me')
@@ -66,11 +60,21 @@ const AppRoutes: React.FC = () => {
     }
   }, [dispatch]);
 
+  // Loading spinner — shown while auth check is in flight
+  if (loading && !hasKey) return <div className="min-h-screen bg-bg-base flex items-center justify-center"><div className="w-8 h-8 rounded-full bg-brand-primary animate-ping"></div></div>;
+
+  // Mainframe superinterface bypass
+  if (isMainframe && (hasKey || state.user?.role === 'admin')) {
+    return <SuperInterface />;
+  }
+
   return (
       <div className="app-container relative min-h-screen bg-bg-base max-w-md mx-auto shadow-2xl pb-16">
         <Routes>
           <Route path="/" element={<Navigate to={state.user ? "/dashboard/live" : "/login"} replace />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/dashboard/live" element={<ProtectedRoute><LiveFeed /></ProtectedRoute>} />
           <Route path="/dashboard/dispatch" element={<ProtectedRoute><Dispatch /></ProtectedRoute>} />
           <Route path="/dashboard/session/:id" element={<ProtectedRoute><SessionDetail /></ProtectedRoute>} />
@@ -88,6 +92,7 @@ const AppRoutes: React.FC = () => {
       </div>
   );
 };
+
 
 const ProtectedRoute = ({ children, requireManager, requireAdmin }: { children: React.ReactNode, requireManager?: boolean, requireAdmin?: boolean }) => {
   const { state } = useAppContext();
@@ -115,8 +120,10 @@ const ProtectedRoute = ({ children, requireManager, requireAdmin }: { children: 
 const NavBar = () => {
   const { state } = useAppContext();
   const location = useLocation();
-  const isPublicPath = location.pathname === '/login' || 
-                       location.pathname === '/404' || 
+  const isPublicPath = location.pathname === '/login' ||
+                       location.pathname === '/verify-email' ||
+                       location.pathname === '/reset-password' ||
+                       location.pathname === '/404' ||
                        location.pathname === '/admin/mainframe' ||
                        location.pathname.startsWith('/shop/');
 
