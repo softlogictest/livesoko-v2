@@ -17,7 +17,8 @@ export const PublicOrderPage: React.FC = () => {
     item_name: '',
     quantity: 1,
     unit_price: 0,
-    product_specifics: ''
+    product_specifics: '',
+    payment_type: 'MPESA'
   });
 
   useEffect(() => {
@@ -86,25 +87,43 @@ export const PublicOrderPage: React.FC = () => {
       <h1 className="text-3xl font-bold mb-2">Order Received!</h1>
       <p className="text-text-secondary mb-8">Thank you for shopping with <strong>{shop?.name}</strong>.</p>
       
-      <div className="bg-bg-surface border border-border-subtle p-6 rounded-2xl max-w-sm w-full text-left">
-        <h3 className="font-bold text-brand-primary mb-4 flex items-center gap-2">
-          <span>📲</span> HOW TO PAY
-        </h3>
-        <ol className="space-y-4 text-sm">
-          <li className="flex gap-3">
-            <span className="bg-brand-primary/20 text-brand-primary w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">1</span>
-            <span>Go to your <strong>M-PESA</strong> menu.</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="bg-brand-primary/20 text-brand-primary w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">2</span>
-            <span>Send <strong>the agreed amount</strong> to the seller's M-Pesa number.</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="bg-brand-primary/20 text-brand-primary w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">3</span>
-            <span>Stay in the <strong>Live Session</strong>! Your order will turn green once verified.</span>
-          </li>
-        </ol>
-      </div>
+      {formData.payment_type === 'MPESA' ? (
+        <div className="bg-bg-surface border border-border-subtle p-6 rounded-2xl max-w-sm w-full text-left">
+          <h3 className="font-bold text-brand-primary mb-4 flex items-center gap-2">
+            <span>📲</span> HOW TO PAY
+          </h3>
+          <ol className="space-y-4 text-sm">
+            <li className="flex gap-3">
+              <span className="bg-brand-primary/20 text-brand-primary w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">1</span>
+              <span>Go to your <strong>M-PESA</strong> menu.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="bg-brand-primary/20 text-brand-primary w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">2</span>
+              <span>Send <strong>the agreed amount</strong> to the seller's M-Pesa number.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="bg-brand-primary/20 text-brand-primary w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">3</span>
+              <span>Stay in the <strong>Live Session</strong>! Your order will turn green once verified.</span>
+            </li>
+          </ol>
+        </div>
+      ) : (
+        <div className="bg-blue-500/10 border border-blue-500/30 p-6 rounded-2xl max-w-sm w-full text-left">
+          <h3 className="font-bold text-blue-400 mb-4 flex items-center gap-2">
+            <span>📦</span> CASH ON DELIVERY
+          </h3>
+          <ol className="space-y-4 text-sm text-text-primary">
+            <li className="flex gap-3">
+              <span className="bg-blue-500/20 text-blue-400 w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">1</span>
+              <span>The seller will confirm your order on the Live stream.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="bg-blue-500/20 text-blue-400 w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold">2</span>
+              <span>You will pay the rider in cash or M-Pesa upon delivery.</span>
+            </li>
+          </ol>
+        </div>
+      )}
 
       <button 
         onClick={() => setSubmitted(false)}
@@ -147,6 +166,32 @@ export const PublicOrderPage: React.FC = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Payment type toggle */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, payment_type: 'MPESA'})}
+                className={`flex-1 py-3 rounded-xl text-sm font-display font-bold uppercase tracking-widest border transition-colors ${
+                  formData.payment_type === 'MPESA'
+                    ? 'bg-brand-primary text-black border-brand-primary shadow-[0_0_15px_rgba(0,255,136,0.2)]'
+                    : 'bg-bg-surface text-text-muted border-border-subtle'
+                }`}
+              >
+                📲 M-PESA
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, payment_type: 'COD'})}
+                className={`flex-1 py-3 rounded-xl text-sm font-display font-bold uppercase tracking-widest border transition-colors ${
+                  formData.payment_type === 'COD'
+                    ? 'bg-blue-500 text-white border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                    : 'bg-bg-surface text-text-muted border-border-subtle'
+                }`}
+              >
+                📦 COD
+              </button>
+            </div>
+
             <section className="space-y-4">
               <h2 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Item Details</h2>
               
@@ -175,9 +220,11 @@ export const PublicOrderPage: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs text-text-secondary ml-1">Agreed Price (Ksh)</label>
+                  <label className="text-xs text-text-secondary ml-1">
+                    Agreed Price (Ksh) {formData.payment_type === 'COD' && <span className="text-text-muted normal-case">— optional</span>}
+                  </label>
                   <input 
-                    required
+                    required={formData.payment_type === 'MPESA'}
                     type="number"
                     min="1"
                     placeholder="e.g. 1500"
@@ -187,7 +234,9 @@ export const PublicOrderPage: React.FC = () => {
                   />
                 </div>
               </div>
-              <p className="text-[10px] text-text-muted ml-1 -mt-2 italic">Enter the price the seller quoted on Live</p>
+              {formData.payment_type === 'MPESA' && (
+                <p className="text-[10px] text-text-muted ml-1 -mt-2 italic">Enter the price the seller quoted on Live</p>
+              )}
 
               <div className="space-y-2">
                 <label className="text-xs text-text-secondary ml-1">Product Specifics <span className="text-text-muted">(optional)</span></label>
@@ -257,7 +306,11 @@ export const PublicOrderPage: React.FC = () => {
               <button 
                 type="submit"
                 disabled={loading}
-                className="w-full bg-brand-primary text-bg-base font-bold py-4 rounded-2xl text-lg shadow-[0_10px_30px_rgba(0,255,136,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                className={`w-full font-bold py-4 rounded-2xl text-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 ${
+                  formData.payment_type === 'COD'
+                    ? 'bg-blue-500 text-white shadow-[0_10px_30px_rgba(59,130,246,0.3)]'
+                    : 'bg-brand-primary text-bg-base shadow-[0_10px_30px_rgba(0,255,136,0.3)]'
+                }`}
               >
                 {loading ? 'Sinking order...' : 'PLACE ORDER NOW'}
               </button>

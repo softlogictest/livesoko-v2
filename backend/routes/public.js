@@ -42,7 +42,7 @@ router.post('/order', [
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-  const { shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, product_specifics } = req.body;
+  const { shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, product_specifics, payment_type } = req.body;
   const db = getDb();
 
   // Find active session for this shop
@@ -57,10 +57,13 @@ router.post('/order', [
 
   const id = crypto.randomUUID();
 
+  const pType = payment_type === 'COD' ? 'COD' : 'MPESA';
+  const initialStatus = pType === 'COD' ? 'COD_PENDING' : 'PENDING';
+
   try {
     db.prepare(`
-      INSERT INTO orders (id, session_id, shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, status, product_specifics)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?)
+      INSERT INTO orders (id, session_id, shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, status, payment_type, product_specifics)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id, session.id, shop_id,
       buyer_name,
@@ -70,13 +73,19 @@ router.post('/order', [
       item_name,
       parseInt(quantity) || 1,
       parseFloat(unit_price) || 0,
+      initialStatus,
+      pType,
       product_specifics || null
     );
 
     const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
     broadcast('order:new', order);
 
-    res.status(201).json({ success: true, message: 'Order received! Please complete your M-Pesa payment.' });
+    const successMsg = pType === 'COD' 
+      ? 'Order received! The seller will prepare your package for Cash on Delivery.'
+      : 'Order received! Please complete your M-Pesa payment.';
+      
+    res.status(201).json({ success: true, message: successMsg });
   } catch (err) {
     console.error('[Public Order Error]', err.message);
     res.status(500).json({ error: 'Failed to submit order. Please try again.' });

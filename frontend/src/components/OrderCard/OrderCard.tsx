@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { OrderCardProps } from '../../types';
 import { OrderDrawer } from './OrderDrawer';
+import { fetchWithAuth } from '../../lib/api';
 
 const statusColors: any = {
   VERIFIED: 'border-status-verified',
@@ -36,7 +37,7 @@ export const OrderCard: React.FC<{ order: OrderCardProps }> = ({ order }) => {
     <>
       <div 
         onClick={() => setDrawerOpen(true)}
-        className={`bg-bg-surface border-l-4 ${statusColors[order.status]} p-4 mb-3 rounded-r-md cursor-pointer relative overflow-hidden`}
+        className={`bg-bg-surface border-l-4 ${statusColors[order.status]} ${order.payment_type === 'COD' ? 'border-y border-r border-blue-500/30 shadow-[0_0_10px_rgba(59,130,246,0.1)]' : ''} p-4 mb-3 rounded-r-md cursor-pointer relative overflow-hidden`}
       >
         <div className="flex justify-between items-start mb-2">
           <div className="flex flex-col">
@@ -72,7 +73,22 @@ export const OrderCard: React.FC<{ order: OrderCardProps }> = ({ order }) => {
               Ksh {order.expected_amount ? order.expected_amount.toLocaleString() : '...'}
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            {order.status === 'PENDING' && (
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  try {
+                    await fetchWithAuth(`/api/orders/${order.id}/verify`, { method: 'POST' });
+                  } catch (err) {
+                    alert('Failed to push to dispatch');
+                  }
+                }}
+                className="px-3 py-1.5 rounded bg-brand-primary/10 text-brand-primary text-[10px] font-display font-bold uppercase hover:bg-brand-primary hover:text-black transition-colors"
+              >
+                Push to Dispatch
+              </button>
+            )}
             <a href={`tel:${order.buyer_phone}`} onClick={e => e.stopPropagation()} className="p-2 rounded-full bg-bg-elevated text-status-verified">
               📞
             </a>

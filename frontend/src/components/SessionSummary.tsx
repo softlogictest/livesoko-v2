@@ -43,6 +43,13 @@ const ReceiptCard = ({ order }: { order: any }) => (
       <div className="truncate max-w-[60%] shrink-0">DELIV: {order.delivery_location}</div>
       <div className="shrink-0">{new Date(order.created_at.replace(' ', 'T') + 'Z').toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
     </div>
+    
+    {order.product_specifics && (
+      <div className="mt-2 text-[#444] text-[10px] italic bg-[#e0e0e0] p-2 rounded leading-tight">
+        <span className="not-italic text-[9px] uppercase text-[#666] block font-bold mb-0.5">Note</span>
+        {order.product_specifics}
+      </div>
+    )}
 
      {/* Receipt Jagged Edge Bottom */}
      <div className="absolute bottom-0 left-0 w-full h-[6px]" style={{
