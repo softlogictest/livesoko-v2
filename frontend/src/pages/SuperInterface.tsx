@@ -15,7 +15,7 @@ export const SuperInterface: React.FC = () => {
     const mainframeKey = urlParams.get('key');
 
     const fetchData = async () => {
-      const headers = mainframeKey ? { 'x-mainframe-key': mainframeKey } : {};
+      const headers: Record<string, string> = mainframeKey ? { 'x-mainframe-key': mainframeKey } : {};
       try {
         const [statsRes, logsRes, sysRes] = await Promise.all([
           fetchWithAuth('/api/admin/stats', { headers }),

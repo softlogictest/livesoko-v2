@@ -97,7 +97,7 @@ const ProtectedRoute = ({ children, requireManager, requireAdmin }: { children: 
 
   if (!state.user && !hasMainframeKey) return <Navigate to="/login" replace />;
   
-  if (requireAdmin && state.user.role !== 'admin') {
+  if (requireAdmin && state.user?.role !== 'admin') {
     return <Navigate to="/dashboard/live" replace />;
   }
 
