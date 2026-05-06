@@ -67,6 +67,16 @@ const TutorialTab = ({ role }: { role?: string }) => {
           Orders appear on the Live tab as they come in. Tap any order to <strong>verify payment</strong>, <strong>mark it as packed</strong>, or <strong>send delivery info to your rider</strong> via WhatsApp.
         </p>
       </div>
+
+      <div className="bg-bg-surface p-5 rounded-xl border border-brand-primary/20 relative shadow-[0_0_20px_rgba(0,255,136,0.05)]">
+        <div className="absolute top-0 right-0 bg-brand-primary/20 text-brand-primary text-[8px] font-bold px-2 py-1 uppercase italic">Bonus</div>
+        <h4 className="font-bold text-text-primary mb-1 uppercase tracking-widest text-xs">Automate with Companion App</h4>
+        <p className="text-xs text-text-secondary leading-relaxed">
+          Want orders to verify <strong>automatically</strong>? Go to <strong>Config</strong>, download the <strong>Companion App</strong> on your M-Pesa phone, and paste your connection code. 
+          <br/><br/>
+          💡 <strong>Tip:</strong> Use the "Share via WhatsApp" button in Config to send the link and code directly to your other phone!
+        </p>
+      </div>
     </div>
   );
 };
@@ -361,12 +371,23 @@ export const Settings: React.FC = () => {
                 It runs securely in the background and automatically verifies orders when payment arrives.
               </p>
 
-              <button 
-                onClick={() => window.location.href = '/livesoko-sync.apk'}
-                className="w-full bg-brand-primary/20 text-brand-primary border border-brand-primary py-3 rounded-lg font-bold text-xs uppercase tracking-widest mb-6 hover:bg-brand-primary hover:text-black transition-colors flex items-center justify-center gap-2"
-              >
-                ⬇️ DOWNLOAD COMPANION APP
-              </button>
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <button 
+                  onClick={() => window.location.href = '/livesoko-sync.apk'}
+                  className="bg-brand-primary/20 text-brand-primary border border-brand-primary/40 py-3 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-brand-primary hover:text-black transition-all flex items-center justify-center gap-2"
+                >
+                  ⬇️ DOWNLOAD
+                </button>
+                <button 
+                  onClick={() => {
+                    const shareText = `*LiveSoko Companion Setup*\n\n1. Install the app on the M-Pesa phone:\n${window.location.origin}/livesoko-sync.apk\n\n2. Use this Connection Code:\n${webhookUrl}`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+                  }}
+                  className="bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/40 py-3 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#25D366] hover:text-white transition-all flex items-center justify-center gap-2"
+                >
+                  🟢 SHARE CODE
+                </button>
+              </div>
               
               <div className="mb-3">
                 <label className="text-[10px] uppercase text-text-muted font-bold block mb-2">Shop Connection Code (paste this into the app)</label>
