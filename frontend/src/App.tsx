@@ -12,6 +12,7 @@ import { Network } from './pages/Network';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { NotFound } from './pages/NotFound';
 import { AppProvider, useAppContext } from './context/AppContext';
+import { MaintenanceModal } from './components/MaintenanceModal';
 import { fetchWithAuth, API } from './lib/api';
 
 export { API };
@@ -74,6 +75,7 @@ const AppRoutes: React.FC = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
         <NavBar />
+        <MaintenanceModal />
       </div>
   );
 };
