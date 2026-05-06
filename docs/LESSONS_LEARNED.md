@@ -57,3 +57,7 @@ Technical lessons from building and stabilizing LiveSoko. Each lesson came from 
 - **The Hurdle**: Tried to build an SMS Forwarder using Expo/React Native SDK 52. The "New Architecture" broke all legacy SMS libraries, and background execution was notoriously unstable.
 - **The Fix**: Abandoned Expo entirely. Built a **Pure Native Kotlin** app (~2MB). Used a native `BroadcastReceiver` for SMS and **GitHub Actions** to compile the APK remotely.
 - **The Lesson**: For simple utility tasks (SMS listening, background services), React Native is a heavy, brittle distraction. Native code is lighter, more reliable, and easier to build via CI/CD than fighting "bleeding-edge" framework dependencies. Also: Never reference app icons in the Manifest if you haven't created the image files — it's a silent build killer.
+## 12. External Webhooks need window.location.origin 🔌
+- **The Hurdle**: The companion app was failing to connect on Railway. The Settings page was hardcoded to `http://` and fallback to port `3000`. On Railway, this generated an unreachable URL (e.g. `http://livesoko.up.railway.app:3000/...`).
+- **The Fix**: Replaced manual URL construction with `window.location.origin`. 
+- **The Lesson**: Never hardcode protocols or ports for links that need to be copied. `window.location.origin` automatically handles the difference between Local Dev (`http://192.168.x.x:3000`) and Production (`https://domain.com`) without any extra logic.

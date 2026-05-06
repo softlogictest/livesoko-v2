@@ -30,10 +30,10 @@ We use **GitHub Actions** to build the APK so you don't need to install any heav
 
 ## 3. Configuration
 1. **Open LiveSoko Sync** on the phone.
-2. **Get Webhook URL**:
-   - On your laptop, open the LiveSoko Dashboard.
-   - Go to **Settings** → **Config**.
-   - Copy the **Webhook URL** (e.g., `http://192.168.1.10:5001/api/sms/TOKEN`).
+2. **Get Connection Code**:
+   - In your dashboard, go to **Settings** → **Config**.
+   - Copy the **Shop Connection Code**. (The app now auto-detects if you are on WiFi or Railway and gives you the correct link).
+
 3. **Paste & Save**:
    - Paste the URL into the app's input field.
    - Tap **SAVE URL & START LISTENING**.
