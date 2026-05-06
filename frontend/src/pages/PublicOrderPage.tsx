@@ -16,7 +16,8 @@ export const PublicOrderPage: React.FC = () => {
     delivery_location: '',
     item_name: '',
     quantity: 1,
-    unit_price: 0
+    unit_price: 0,
+    product_specifics: ''
   });
 
   useEffect(() => {
@@ -187,6 +188,17 @@ export const PublicOrderPage: React.FC = () => {
                 </div>
               </div>
               <p className="text-[10px] text-text-muted ml-1 -mt-2 italic">Enter the price the seller quoted on Live</p>
+
+              <div className="space-y-2">
+                <label className="text-xs text-text-secondary ml-1">Product Specifics <span className="text-text-muted">(optional)</span></label>
+                <textarea
+                  rows={3}
+                  placeholder="e.g. Size L, Black colour, with hood — anything specific you want the seller to know"
+                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all resize-none text-sm"
+                  value={formData.product_specifics}
+                  onChange={e => setFormData({...formData, product_specifics: e.target.value})}
+                />
+              </div>
             </section>
 
             <section className="space-y-4 pt-4 border-t border-border-subtle">

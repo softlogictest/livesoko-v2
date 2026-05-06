@@ -86,10 +86,10 @@ export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void 
       onClick={onClose}
     >
       <div 
-        className="bg-bg-elevated w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+        className="bg-bg-elevated w-full max-w-md rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           <div className="flex justify-between items-center mb-6 border-b border-border-subtle pb-4">
             <div>
               <div className="text-text-muted text-[10px] uppercase font-body mb-1 tracking-wider">Order ID: {order.id.slice(0,8)}</div>
@@ -125,6 +125,12 @@ export const OrderDrawer: React.FC<{ order: OrderCardProps, onClose: () => void 
             <div className="text-text-muted text-[10px] uppercase mb-1">LOCATION</div>
             <div className="text-text-primary">{order.delivery_location}</div>
           </div>
+          {(order as any).product_specifics && (
+            <div className="col-span-2">
+              <div className="text-text-muted text-[10px] uppercase mb-1">PRODUCT SPECIFICS</div>
+              <div className="text-text-primary bg-bg-base border border-border-subtle rounded-lg px-3 py-2 text-xs font-body leading-relaxed">{(order as any).product_specifics}</div>
+            </div>
+          )}
         </div>
 
         {order.status_reason && (
