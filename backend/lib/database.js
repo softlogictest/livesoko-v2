@@ -589,18 +589,21 @@ function init() {
   // --- MIGRATION: v2.5.0 — Email verification, password reset, device fingerprint ---
   // Each migration is wrapped in try/catch so it silently no-ops on already-migrated DBs.
   const v250migrations = [
-    { col: 'is_email_verified', sql: `ALTER TABLE profiles ADD COLUMN is_email_verified INTEGER NOT NULL DEFAULT 0` },
-    { col: 'email_verification_token', sql: `ALTER TABLE profiles ADD COLUMN email_verification_token TEXT` },
-    { col: 'reset_password_token', sql: `ALTER TABLE profiles ADD COLUMN reset_password_token TEXT` },
-    { col: 'reset_password_expires', sql: `ALTER TABLE profiles ADD COLUMN reset_password_expires TEXT` },
-    { col: 'registered_device_id', sql: `ALTER TABLE profiles ADD COLUMN registered_device_id TEXT` },
+    { table: 'profiles', col: 'is_email_verified', sql: `ALTER TABLE profiles ADD COLUMN is_email_verified INTEGER NOT NULL DEFAULT 0` },
+    { table: 'profiles', col: 'email_verification_token', sql: `ALTER TABLE profiles ADD COLUMN email_verification_token TEXT` },
+    { table: 'profiles', col: 'reset_password_token', sql: `ALTER TABLE profiles ADD COLUMN reset_password_token TEXT` },
+    { table: 'profiles', col: 'reset_password_expires', sql: `ALTER TABLE profiles ADD COLUMN reset_password_expires TEXT` },
+    { table: 'profiles', col: 'registered_device_id', sql: `ALTER TABLE profiles ADD COLUMN registered_device_id TEXT` },
+    { table: 'orders', col: 'product_specifics', sql: `ALTER TABLE orders ADD COLUMN product_specifics TEXT` },
   ];
   const currentProfileCols = db.prepare(`PRAGMA table_info(profiles)`).all().map(c => c.name);
+  const currentOrderCols = db.prepare(`PRAGMA table_info(orders)`).all().map(c => c.name);
   for (const m of v250migrations) {
-    if (!currentProfileCols.includes(m.col)) {
+    const cols = m.table === 'profiles' ? currentProfileCols : currentOrderCols;
+    if (!cols.includes(m.col)) {
       try {
         db.exec(m.sql);
-        console.log(`[DB] v2.5.0 migration: added profiles.${m.col}`);
+        console.log(`[DB] v2.5.0 migration: added ${m.table}.${m.col}`);
       } catch (e) {
         console.warn(`[DB] v2.5.0 migration skip (${m.col}):`, e.message);
       }
