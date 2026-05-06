@@ -11,7 +11,6 @@ const adminRouter = require('./routes/admin');
 const ordersRouter = require('./routes/orders');
 const paymentsRouter = require('./routes/payments');
 const sessionsRouter = require('./routes/sessions');
-const os = require('os');
 
 // Log Capture for Super Interface
 class LogBuffer {
