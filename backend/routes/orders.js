@@ -45,7 +45,7 @@ router.post('/', [
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-  const { webhook_token, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, payment_type, buyer_mpesa_name } = req.body;
+  const { webhook_token, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, payment_type, buyer_mpesa_name, product_specifics } = req.body;
 
   // Can be called with webhook_token (unauthenticated, for form/sheet intake)
   // or with auth token (authenticated, for manual entry)
@@ -79,8 +79,8 @@ router.post('/', [
 
   try {
     db.prepare(`
-      INSERT INTO orders (id, session_id, shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, payment_type, buyer_mpesa_name, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO orders (id, session_id, shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, payment_type, buyer_mpesa_name, status, product_specifics)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id, session.id, shopId,
       buyer_name || 'Unknown',
@@ -92,7 +92,8 @@ router.post('/', [
       parseFloat(unit_price) || 0,
       paymentType,
       buyer_mpesa_name || null,
-      initialStatus
+      initialStatus,
+      product_specifics || null
     );
 
     const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
@@ -187,7 +188,7 @@ router.post('/:id/verify', (req, res) => {
 
 // PATCH /api/orders/:id — update order details
 router.patch('/:id', (req, res) => {
-  const { buyer_name, buyer_phone, delivery_location, item_name, unit_price } = req.body;
+  const { buyer_name, buyer_phone, delivery_location, item_name, unit_price, product_specifics } = req.body;
   const db = getDb();
   const order = db.prepare('SELECT * FROM orders WHERE id = ? AND shop_id = ?')
     .get(req.params.id, req.user.shop_id);
@@ -201,6 +202,7 @@ router.patch('/:id', (req, res) => {
       delivery_location = COALESCE(?, delivery_location),
       item_name = COALESCE(?, item_name),
       unit_price = COALESCE(?, unit_price),
+      product_specifics = COALESCE(?, product_specifics),
       updated_at = datetime(?) 
     WHERE id = ? AND shop_id = ?
   `).run(
@@ -209,6 +211,7 @@ router.patch('/:id', (req, res) => {
     delivery_location,
     item_name,
     unit_price,
+    product_specifics,
     new Date().toISOString(),
     req.params.id,
     req.user.shop_id

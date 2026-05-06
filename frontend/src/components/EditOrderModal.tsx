@@ -12,6 +12,7 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose, 
   const [price, setPrice] = useState(order.unit_price.toString());
   const [location, setLocation] = useState(order.delivery_location);
   const [phone, setPhone] = useState(order.buyer_phone);
+  const [productSpecifics, setProductSpecifics] = useState(order.product_specifics || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +22,8 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose, 
       item_name: itemName, 
       unit_price: parseFloat(price), 
       delivery_location: location,
-      buyer_phone: phone 
+      buyer_phone: phone,
+      product_specifics: productSpecifics 
     });
   };
 
@@ -54,6 +56,17 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, onClose, 
               value={itemName}
               onChange={e => setItemName(e.target.value)}
               required
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] text-text-muted uppercase font-body">Product Specifics <span className="normal-case text-text-muted/70">— optional</span></label>
+            <textarea
+              rows={3}
+              className="bg-bg-surface border border-border-subtle rounded p-3 text-sm text-text-primary focus:border-brand-primary outline-none resize-none"
+              value={productSpecifics}
+              onChange={e => setProductSpecifics(e.target.value)}
+              placeholder="e.g. Size L, Black colour"
             />
           </div>
 

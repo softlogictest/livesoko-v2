@@ -42,7 +42,7 @@ router.post('/order', [
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-  const { shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price } = req.body;
+  const { shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, product_specifics } = req.body;
   const db = getDb();
 
   // Find active session for this shop
@@ -59,8 +59,8 @@ router.post('/order', [
 
   try {
     db.prepare(`
-      INSERT INTO orders (id, session_id, shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
+      INSERT INTO orders (id, session_id, shop_id, buyer_name, buyer_tiktok, buyer_phone, delivery_location, item_name, quantity, unit_price, status, product_specifics)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?)
     `).run(
       id, session.id, shop_id,
       buyer_name,
@@ -69,7 +69,8 @@ router.post('/order', [
       delivery_location || 'Not specified',
       item_name,
       parseInt(quantity) || 1,
-      parseFloat(unit_price) || 0
+      parseFloat(unit_price) || 0,
+      product_specifics || null
     );
 
     const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);

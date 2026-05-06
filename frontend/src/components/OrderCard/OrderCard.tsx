@@ -59,6 +59,12 @@ export const OrderCard: React.FC<{ order: OrderCardProps }> = ({ order }) => {
           {order.quantity}x {order.item_name}
         </p>
         
+        {(order as any).product_specifics && (
+          <p className="font-body text-text-muted text-xs mb-3 italic bg-bg-base p-2 rounded-md border border-border-subtle">
+            {(order as any).product_specifics}
+          </p>
+        )}
+        
         <div className="flex justify-between items-end">
           <div className="flex flex-col">
             <div className="text-[10px] text-text-muted uppercase font-body mb-0.5">{order.delivery_location}</div>

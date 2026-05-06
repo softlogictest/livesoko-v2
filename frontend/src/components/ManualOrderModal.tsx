@@ -11,6 +11,7 @@ interface ManualOrderModalProps {
     buyer_phone: string;
     payment_type: 'MPESA' | 'COD';
     buyer_mpesa_name?: string;
+    product_specifics?: string;
   }) => void;
 }
 
@@ -23,6 +24,7 @@ export const ManualOrderModal: React.FC<ManualOrderModalProps> = ({ onClose, onS
   const [phone, setPhone] = useState('');
   const [paymentType, setPaymentType] = useState<'MPESA' | 'COD'>('MPESA');
   const [mpesaName, setMpesaName] = useState('');
+  const [productSpecifics, setProductSpecifics] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +39,7 @@ export const ManualOrderModal: React.FC<ManualOrderModalProps> = ({ onClose, onS
       buyer_phone: phone,
       payment_type: paymentType,
       buyer_mpesa_name: mpesaName || undefined,
+      product_specifics: productSpecifics || undefined,
     });
   };
 
@@ -92,6 +95,17 @@ export const ManualOrderModal: React.FC<ManualOrderModalProps> = ({ onClose, onS
               onChange={e => setItemName(e.target.value)}
               placeholder="e.g. Designer Handbag"
               required
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] text-text-muted uppercase font-body">Product Specifics <span className="normal-case text-text-muted/70">— optional</span></label>
+            <textarea
+              rows={2}
+              className="bg-bg-surface border border-border-subtle rounded p-3 text-sm text-text-primary focus:border-brand-primary outline-none resize-none"
+              value={productSpecifics}
+              onChange={e => setProductSpecifics(e.target.value)}
+              placeholder="e.g. Size L, Black colour"
             />
           </div>
 
