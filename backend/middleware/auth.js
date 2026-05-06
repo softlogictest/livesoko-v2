@@ -62,6 +62,7 @@ const authenticate = (req, res, next) => {
 };
 
 const checkBilling = (req, res, next) => {
+  if (req.user.role === 'admin') return next(); // SuperAdmin is exempt
   if (!req.user.shop_id) return next(); // If route isn't shop specific
   const db = getDb();
   const shop = db.prepare('SELECT subscription_ends_at, trial_ends_at FROM shops WHERE id = ?').get(req.user.shop_id);

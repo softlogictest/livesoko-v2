@@ -11,12 +11,16 @@ export const SuperInterface: React.FC = () => {
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mainframeKey = urlParams.get('key');
+
     const fetchData = async () => {
+      const headers = mainframeKey ? { 'x-mainframe-key': mainframeKey } : {};
       try {
         const [statsRes, logsRes, sysRes] = await Promise.all([
-          fetchWithAuth('/api/admin/stats'),
-          fetchWithAuth('/api/admin/logs'),
-          fetchWithAuth('/api/admin/system')
+          fetchWithAuth('/api/admin/stats', { headers }),
+          fetchWithAuth('/api/admin/logs', { headers }),
+          fetchWithAuth('/api/admin/system', { headers })
         ]);
 
         if (statsRes.ok) setStats(await statsRes.json());

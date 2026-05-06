@@ -84,7 +84,11 @@ const AppRoutes: React.FC = () => {
 
 const ProtectedRoute = ({ children, requireManager, requireAdmin }: { children: React.ReactNode, requireManager?: boolean, requireAdmin?: boolean }) => {
   const { state } = useAppContext();
-  if (!state.user) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  const urlParams = new URLSearchParams(location.search);
+  const hasMainframeKey = urlParams.get('key');
+
+  if (!state.user && !hasMainframeKey) return <Navigate to="/login" replace />;
   
   if (requireAdmin && state.user.role !== 'admin') {
     return <Navigate to="/dashboard/live" replace />;
