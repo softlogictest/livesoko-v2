@@ -8,6 +8,7 @@ export const Dispatch: React.FC = () => {
   const [orders, setOrders] = useState<OrderCardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderCardProps | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -116,7 +117,11 @@ export const Dispatch: React.FC = () => {
           {/* Order list */}
           <div className="px-4 pt-2 flex flex-col gap-2">
             {orders.map((o, i) => (
-              <div key={o.id} className="bg-bg-surface rounded-lg border border-border-subtle px-4 py-3 flex gap-3 items-start">
+              <div 
+                key={o.id} 
+                onClick={() => setSelectedOrder(o)}
+                className="bg-bg-surface rounded-lg border border-border-subtle px-4 py-3 flex gap-3 items-start cursor-pointer hover:border-brand-primary/50 transition-colors"
+              >
                 <div className="text-text-muted font-display text-sm w-5 mt-0.5">{i + 1}.</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center gap-2">
@@ -150,6 +155,66 @@ export const Dispatch: React.FC = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Detail Modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4" onClick={() => setSelectedOrder(null)}>
+          <div className="bg-bg-elevated w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-border-subtle max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-xl font-display font-bold text-brand-primary leading-tight">{selectedOrder.buyer_name}</h3>
+                <span className={`text-[10px] px-2 py-0.5 rounded font-display font-bold uppercase inline-block mt-2 ${
+                  selectedOrder.payment_type === 'COD' ? 'text-blue-400 bg-blue-500/10 border border-blue-500/30' : 'text-status-verified bg-status-verified/10 border border-status-verified/30'
+                }`}>
+                  {selectedOrder.payment_type === 'COD' ? '📦 COD - TO COLLECT' : '✓ PAID'}
+                </span>
+              </div>
+              <button onClick={() => setSelectedOrder(null)} className="text-text-muted hover:text-white p-1">✕</button>
+            </div>
+
+            <div className="space-y-4 font-body text-sm">
+              <div>
+                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Items</div>
+                <div className="text-text-primary">{selectedOrder.quantity}x {selectedOrder.item_name}</div>
+                {/* @ts-ignore - product_specifics might not be in the base type definition but is passed from API */}
+                {selectedOrder.product_specifics && (
+                  <div className="mt-2 bg-bg-base border border-border-subtle rounded p-3 text-xs italic text-text-secondary">
+                    {/* @ts-ignore */}
+                    <span className="not-italic text-[10px] uppercase text-text-muted block mb-1 font-bold">Specifics</span>
+                    {/* @ts-ignore */}
+                    {selectedOrder.product_specifics}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Amount</div>
+                <div className="text-text-primary font-bold text-lg">Ksh {selectedOrder.expected_amount?.toLocaleString() || '0'}</div>
+              </div>
+
+              <div>
+                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Contact</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-text-primary">{selectedOrder.buyer_phone}</div>
+                  <div className="flex gap-2">
+                    <a href={`tel:${selectedOrder.buyer_phone}`} className="w-8 h-8 rounded-full bg-bg-surface border border-border-subtle flex items-center justify-center text-text-secondary hover:text-white transition-colors">📞</a>
+                    <a href={`https://wa.me/${selectedOrder.buyer_phone.replace('+', '')}`} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-bg-surface border border-[#25D366]/30 flex items-center justify-center text-[#25D366] hover:bg-[#25D366]/10 transition-colors">💬</a>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Delivery Location</div>
+                <div className="text-text-primary">{selectedOrder.delivery_location}</div>
+              </div>
+            </div>
+
+            <button onClick={() => setSelectedOrder(null)} className="w-full mt-6 py-3 rounded-lg bg-bg-surface border border-border-subtle text-text-muted font-display font-bold uppercase text-xs hover:text-text-primary transition-colors">
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

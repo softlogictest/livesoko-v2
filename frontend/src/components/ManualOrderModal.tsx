@@ -45,8 +45,9 @@ export const ManualOrderModal: React.FC<ManualOrderModalProps> = ({ onClose, onS
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="bg-bg-elevated w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-border-subtle" onClick={e => e.stopPropagation()}>
-        <h3 className="text-xl font-display font-bold text-brand-primary mb-4">Add Manual Order</h3>
+      <div className="bg-bg-elevated w-full max-w-sm rounded-2xl shadow-2xl border border-border-subtle max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="p-6 overflow-y-auto flex-1">
+          <h3 className="text-xl font-display font-bold text-brand-primary mb-4">Add Manual Order</h3>
 
         {/* Payment type toggle */}
         <div className="flex gap-2 mb-5">
@@ -192,6 +193,7 @@ export const ManualOrderModal: React.FC<ManualOrderModalProps> = ({ onClose, onS
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );
