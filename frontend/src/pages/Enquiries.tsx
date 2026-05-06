@@ -147,6 +147,7 @@ export const Enquiries: React.FC = () => {
             </div>
           ))}
         </div>
+        )
       ) : (
         offlineOrders.length === 0 ? (
           <div className="text-center p-8 bg-bg-surface border border-dashed border-border-subtle rounded-xl text-text-muted">
