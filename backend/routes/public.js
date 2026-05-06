@@ -92,4 +92,34 @@ router.post('/order', [
   }
 });
 
+// POST /api/public/enquiry — Submit public enquiry
+router.post('/enquiry', [
+  body('shop_id').notEmpty().withMessage('Shop ID is required'),
+  body('buyer_name').trim().notEmpty().withMessage('Name is required'),
+  body('buyer_contact').trim().notEmpty().withMessage('Contact is required'),
+  body('message').trim().notEmpty().withMessage('Message is required')
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const { shop_id, buyer_name, buyer_contact, message } = req.body;
+  const id = crypto.randomUUID();
+  const db = getDb();
+
+  try {
+    db.prepare(`
+      INSERT INTO enquiries (id, shop_id, buyer_name, buyer_contact, message, status)
+      VALUES (?, ?, ?, ?, ?, 'PENDING')
+    `).run(id, shop_id, buyer_name, buyer_contact, message);
+
+    const enquiry = db.prepare('SELECT * FROM enquiries WHERE id = ?').get(id);
+    broadcast('enquiry:new', enquiry);
+
+    res.status(201).json({ success: true, message: 'Enquiry sent! The seller will contact you shortly.' });
+  } catch (err) {
+    console.error('[Enquiry Error]', err);
+    res.status(500).json({ error: 'Failed to send enquiry.' });
+  }
+});
+
 module.exports = router;

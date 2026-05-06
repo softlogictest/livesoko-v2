@@ -11,6 +11,7 @@ const adminRouter = require('./routes/admin');
 const ordersRouter = require('./routes/orders');
 const paymentsRouter = require('./routes/payments');
 const sessionsRouter = require('./routes/sessions');
+const enquiriesRouter = require('./routes/enquiries');
 
 // Log Capture for Super Interface
 class LogBuffer {
@@ -149,6 +150,7 @@ app.post('/api/orders/webhook', (req, res, next) => {
 app.use('/api/orders', authenticate, checkBilling, ordersRouter);
 app.use('/api/payments', authenticate, checkBilling, paymentsRouter);
 app.use('/api/sessions', authenticate, checkBilling, sessionsRouter);
+app.use('/api/enquiries', authenticate, checkBilling, enquiriesRouter);
 app.use('/api/settings', authenticate, require('./routes/settings')); // Settings does not use checkBilling so users can manage billing
 app.use('/api/admin', authenticate, adminRouter);
 

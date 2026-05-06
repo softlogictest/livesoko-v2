@@ -5,6 +5,7 @@ import { LiveFeed } from './pages/LiveFeed';
 import { SessionDetail } from './pages/SessionDetail';
 import { Settings } from './pages/Settings';
 import { Dispatch } from './pages/Dispatch';
+import { Enquiries } from './pages/Enquiries';
 import { Sessions } from './pages/Sessions';
 import { Billing } from './pages/Billing';
 import { PublicOrderPage } from './pages/PublicOrderPage';
@@ -77,6 +78,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/dashboard/live" element={<ProtectedRoute><LiveFeed /></ProtectedRoute>} />
           <Route path="/dashboard/dispatch" element={<ProtectedRoute><Dispatch /></ProtectedRoute>} />
+          <Route path="/dashboard/inbox" element={<ProtectedRoute><Enquiries /></ProtectedRoute>} />
           <Route path="/dashboard/session/:id" element={<ProtectedRoute><SessionDetail /></ProtectedRoute>} />
           <Route path="/dashboard/sessions" element={<ProtectedRoute requireManager><Sessions /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute requireManager><Settings /></ProtectedRoute>} />
@@ -148,6 +150,14 @@ const NavBar = () => {
       >
         <span className="text-xl mb-1">🏍️</span>
         <span className="text-[10px] font-display font-bold uppercase">Dispatch</span>
+      </NavLink>
+
+      <NavLink
+        to="/dashboard/inbox"
+        className={({ isActive }) => `flex flex-col items-center justify-center w-full h-full transition-colors ${isActive ? 'text-brand-primary' : 'text-text-muted hover:text-text-secondary'}`}
+      >
+        <span className="text-xl mb-1 mt-0.5">📬</span>
+        <span className="text-[10px] font-display font-bold uppercase">Inbox</span>
       </NavLink>
 
       {isManagerOrOwner && (

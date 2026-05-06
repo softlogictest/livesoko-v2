@@ -8,6 +8,13 @@ export const PublicOrderPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [enquirySubmitted, setEnquirySubmitted] = useState(false);
+  
+  const [enquiryData, setEnquiryData] = useState({
+    buyer_name: '',
+    buyer_contact: '',
+    message: ''
+  });
   
   const [formData, setFormData] = useState({
     buyer_name: '',
@@ -52,6 +59,28 @@ export const PublicOrderPage: React.FC = () => {
       if (!res.ok) throw new Error(data.error || 'Failed to submit order');
       
       setSubmitted(true);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEnquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const res = await fetch(`${API}/api/public/enquiry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...enquiryData, shop_id: shop.id })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit enquiry');
+      
+      setEnquirySubmitted(true);
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -134,6 +163,22 @@ export const PublicOrderPage: React.FC = () => {
     </div>
   );
 
+  if (enquirySubmitted) return (
+    <div className={`min-h-screen bg-bg-base flex flex-col items-center justify-center p-6 text-center theme-${shop?.color_scheme || 'acid-green'}`}>
+      <div className="w-24 h-24 bg-brand-primary/10 text-brand-primary rounded-full flex items-center justify-center text-5xl mb-6 animate-bounce-in">
+        📬
+      </div>
+      <h1 className="text-3xl font-bold mb-2">Message Sent!</h1>
+      <p className="text-text-secondary mb-8">The seller has received your inquiry and will contact you soon.</p>
+      <button 
+        onClick={() => setEnquirySubmitted(false)}
+        className="mt-8 px-6 py-3 bg-bg-surface border border-border-subtle rounded-xl text-text-primary hover:border-brand-primary transition-colors"
+      >
+        Send another message
+      </button>
+    </div>
+  );
+
   return (
     <div className={`min-h-screen bg-bg-base theme-${shop?.color_scheme || 'acid-green'}`}>
       {/* Header */}
@@ -153,16 +198,60 @@ export const PublicOrderPage: React.FC = () => {
 
       <div className="max-w-md mx-auto p-6 pb-12">
         {!shop?.is_live ? (
-          <div className="py-20 text-center space-y-4">
-            <div className="text-6xl mb-6 opacity-40">😴</div>
-            <h2 className="text-2xl font-bold">Shop is Currently Offline</h2>
-            <p className="text-text-secondary">Please wait for the seller to go live to place your order!</p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="mt-6 px-6 py-2 bg-bg-surface border border-border-subtle rounded-xl text-sm"
-            >
-              Refresh Status
-            </button>
+          <div className="animate-fade-in">
+            <div className="mb-8 text-center">
+              <div className="w-16 h-16 bg-bg-surface border border-border-subtle rounded-full flex items-center justify-center mx-auto mb-4 text-2xl opacity-60">
+                😴
+              </div>
+              <h2 className="text-2xl font-bold text-text-primary mb-2">Store is Offline</h2>
+              <p className="text-text-secondary text-sm">The seller is not currently live, but you can leave a message or inquiry below. They will get back to you!</p>
+            </div>
+
+            <form onSubmit={handleEnquirySubmit} className="space-y-5 bg-bg-surface border border-border-subtle p-6 rounded-2xl shadow-xl">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Your Name</label>
+                <input 
+                  required
+                  type="text"
+                  placeholder="e.g. Jane Doe"
+                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                  value={enquiryData.buyer_name}
+                  onChange={e => setEnquiryData({...enquiryData, buyer_name: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Contact Info</label>
+                <input 
+                  required
+                  type="text"
+                  placeholder="Phone number or TikTok handle"
+                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all"
+                  value={enquiryData.buyer_contact}
+                  onChange={e => setEnquiryData({...enquiryData, buyer_contact: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-text-muted uppercase tracking-wider ml-1">Message</label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="What would you like to ask or order?"
+                  className="w-full bg-bg-input border border-border-subtle rounded-xl px-4 py-3 focus:border-brand-primary outline-none transition-all resize-none"
+                  value={enquiryData.message}
+                  onChange={e => setEnquiryData({...enquiryData, message: e.target.value})}
+                />
+              </div>
+
+              <button 
+                type="submit"
+                disabled={loading}
+                className="w-full bg-brand-primary text-black font-bold py-4 rounded-xl mt-4 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(0,255,136,0.2)]"
+              >
+                {loading ? 'Sending...' : 'SEND INQUIRY'}
+              </button>
+            </form>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">

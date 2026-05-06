@@ -413,6 +413,16 @@ function init() {
       UNIQUE(shop_id, sender_number)
     );
 
+    CREATE TABLE IF NOT EXISTS enquiries (
+      id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+      shop_id TEXT NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+      buyer_name TEXT NOT NULL,
+      buyer_contact TEXT NOT NULL,
+      message TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'REPLIED', 'CONVERTED')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_orders_session_id ON orders(session_id);
     CREATE INDEX IF NOT EXISTS idx_orders_shop_id ON orders(shop_id);
     CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
@@ -423,6 +433,7 @@ function init() {
     CREATE INDEX IF NOT EXISTS idx_auth_tokens_user ON auth_tokens(user_id);
     CREATE INDEX IF NOT EXISTS idx_shops_owner ON shops(owner_id);
     CREATE INDEX IF NOT EXISTS idx_shop_users_user ON shop_users(user_id);
+    CREATE INDEX IF NOT EXISTS idx_enquiries_shop_id ON enquiries(shop_id);
   `);
 
   db.exec(`
